@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Shadow Hunter" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Shadow Hunter Calisthenics</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { background: #09090f; color: white; min-height: 100vh; overflow-x: hidden; }
+    .hunter-aura { position: absolute; inset: -55px; background: radial-gradient(circle at 50% 45%, var(--aura-main, rgba(99,102,241,.34)), var(--aura-secondary, rgba(34,211,238,.12)), transparent 62%); filter: blur(var(--aura-blur, 22px)); animation: pulseAura var(--aura-speed, 4s) ease-in-out infinite; pointer-events: none; z-index: 1; }
+    @keyframes pulseAura { 0%,100% { opacity: .45; transform: scale(1); } 50% { opacity: .95; transform: scale(1.08); } }
+    .active-companion { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 20px; background: linear-gradient(135deg, rgba(79,70,229,.28), rgba(2,6,23,.88)); border: 1px solid rgba(255,255,255,.1); margin-top: 14px; margin-bottom: 10px; position: relative; overflow: hidden; }
+    .active-companion::before { content: ''; position: absolute; inset: -40%; background: radial-gradient(circle, rgba(167,139,250,.18), transparent 55%); animation: pulseAura 5s ease-in-out infinite; }
+    .active-companion-emoji { position: relative; font-size: 44px; filter: drop-shadow(0 0 18px rgba(167,139,250,.8)); }
+    .active-companion-info { position: relative; }
+    .floating-chibis { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+    .floating-chibi { position: absolute; width: 62px; height: 62px; display: grid; place-items: center; font-size: 42px; border-radius: 999px; background: radial-gradient(circle, rgba(167,139,250,.22), transparent 65%); filter: drop-shadow(0 0 14px rgba(167,139,250,.8)); animation: floatChibi 4s ease-in-out infinite; }
+    .floating-chibi:nth-child(1) { right: 22px; top: 110px; animation-delay: 0s; }
+    .floating-chibi:nth-child(2) { left: 22px; top: 245px; animation-delay: .8s; }
+    .floating-chibi:nth-child(3) { right: 34px; bottom: 125px; animation-delay: 1.5s; }
+    @keyframes floatChibi { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-12px) scale(1.05); } }
+    .companion-card .fake-img { filter: drop-shadow(0 0 10px rgba(167,139,250,.35)); }
+    .app { max-width: 430px; margin: 0 auto; min-height: 100vh; padding: 18px; background: radial-gradient(circle at top, #312e81 0%, #18181b 38%, #05050a 100%); position: relative; z-index: 1; overflow: hidden; }
+    .hero { position: relative; min-height: 310px; border-radius: 32px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,.55); background: linear-gradient(135deg, #1e1b4b, #27272a); }
+    .hero-art { position: absolute; inset: 0; background: radial-gradient(circle at 50% 15%, rgba(255,255,255,.22), transparent 28%), linear-gradient(160deg, rgba(49,46,129,.92), rgba(2,6,23,.88)); background-size: cover; background-position: center; opacity: .9; }
+    .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.95), rgba(0,0,0,.1)); }
+    .hero-content { position: relative; z-index: 2; min-height: 310px; display: flex; flex-direction: column; justify-content: flex-end; padding: 22px; }
+    .tag { display: inline-flex; align-items: center; width: fit-content; gap: 7px; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.16); backdrop-filter: blur(10px); color: #c4b5fd; font-size: 13px; margin-bottom: 12px; }
+    h1 { font-size: 36px; line-height: 1; letter-spacing: -1px; }
+    .subtitle { color: #e5e7eb; margin-top: 8px; font-size: 16px; }
+    .xp-bar { margin-top: 18px; height: 15px; background: rgba(255,255,255,.15); border-radius: 999px; overflow: hidden; }
+    .xp-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #c4b5fd, #6366f1, #22d3ee); border-radius: 999px; transition: width .45s ease; }
+    .xp-text { font-size: 13px; color: #d4d4d8; margin-top: 8px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+    .stat { background: rgba(24,24,27,.86); border: 1px solid rgba(255,255,255,.08); border-radius: 22px; padding: 14px; text-align: center; box-shadow: 0 12px 30px rgba(0,0,0,.25); }
+    .stat .value { font-weight: 800; font-size: 21px; margin-top: 4px; }
+    .stat .label { color: #a1a1aa; font-size: 12px; margin-top: 2px; }
+    .card { background: rgba(24,24,27,.92); border: 1px solid rgba(255,255,255,.08); border-radius: 28px; padding: 18px; margin-bottom: 16px; box-shadow: 0 16px 40px rgba(0,0,0,.32); }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .card h2 { font-size: 21px; }
+    .small { color: #a1a1aa; font-size: 13px; }
+    .exercise { width: 100%; border: 1px solid rgba(255,255,255,.08); background: #27272a; color: white; border-radius: 20px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; text-align: left; transition: .2s ease; }
+    .exercise:active { transform: scale(.98); }
+    .exercise.done { background: rgba(34,197,94,.16); border-color: rgba(34,197,94,.5); }
+    .exercise-title { font-weight: 750; }
+    .exercise-meta { color: #a1a1aa; font-size: 13px; margin-top: 3px; }
+    .check { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 999px; background: rgba(255,255,255,.1); color: #d4d4d8; font-weight: bold; }
+    .done .check { background: #22c55e; color: #052e16; }
+    .primary { width: 100%; border: none; min-height: 52px; border-radius: 19px; font-size: 16px; font-weight: 850; background: linear-gradient(135deg, #4f46e5, #22d3ee); color: white; cursor: pointer; box-shadow: 0 14px 28px rgba(79,70,229,.32); }
+    .primary:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+    .ghost { border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #d4d4d8; border-radius: 15px; padding: 9px 12px; cursor: pointer; }
+    .rewards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; margin-top: 14px; }
+    .reward { aspect-ratio: 1; border-radius: 18px; overflow: hidden; position: relative; background: linear-gradient(135deg, #1e1b4b, #27272a); border: 1px solid rgba(255,255,255,.1); }
+    .reward .fake-img { width: 100%; height: 100%; display: grid; place-items: center; font-size: 25px; background: radial-gradient(circle at top, rgba(255,255,255,.25), transparent 35%), linear-gradient(135deg, #1e1b4b, #18181b); }
+    .reward.locked .fake-img { filter: grayscale(1); opacity: .25; }
+    .level-badge { position: absolute; right: 5px; bottom: 5px; font-size: 10px; background: rgba(0,0,0,.65); padding: 3px 6px; border-radius: 999px; }
+    .lock { position: absolute; inset: 0; display: grid; place-items: center; font-size: 20px; }
+    input { width: 100%; border: 1px solid rgba(255,255,255,.1); background: #27272a; color: white; border-radius: 18px; padding: 13px 14px; outline: none; margin-top: 10px; }
+    .tabs { display:flex; gap:8px; position:sticky; bottom:12px; background:rgba(24,24,27,.92); border:1px solid rgba(255,255,255,.08); padding:8px; border-radius:24px; backdrop-filter:blur(14px); overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; padding-bottom:calc(8px + env(safe-area-inset-bottom)); }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab { border:none; border-radius:17px; padding:12px 14px; background:transparent; color:#a1a1aa; font-weight:750; cursor:pointer; white-space:nowrap; flex:0 0 auto; font-size:13px; }
+    .tab.active { background: white; color: #18181b; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .toast { position: fixed; left: 50%; bottom: 86px; transform: translateX(-50%) translateY(20px); opacity: 0; background: white; color: #18181b; padding: 12px 16px; border-radius: 999px; font-weight: 800; transition: .25s ease; z-index: 20; box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .skill { display: flex; justify-content: space-between; align-items: center; background: #27272a; padding: 14px; border-radius: 18px; margin-bottom: 10px; }
+    .danger { width: 100%; border: 1px solid rgba(248,113,113,.35); background: rgba(127,29,29,.2); color: #c4b5fd; border-radius: 18px; padding: 13px; font-weight: 800; cursor: pointer; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: none; align-items: center; justify-content: center; padding: 18px; z-index: 50; }
+    .modal-backdrop.show { display: flex; }
+    .modal { width: 100%; max-width: 390px; background: #18181b; border: 1px solid rgba(255,255,255,.12); border-radius: 26px; padding: 20px; box-shadow: 0 28px 80px rgba(0,0,0,.6); }
+    .modal h3 { font-size: 22px; margin-bottom: 8px; }
+    .modal p { color: #d4d4d8; line-height: 1.5; margin-bottom: 14px; }
+    .info-line { cursor: pointer; padding: 6px 0; border-radius: 10px; }
+    .week-card { display: flex; align-items: center; gap: 16px; }
+    .week-ring { position: relative; width: 76px; height: 76px; flex: 0 0 auto; }
+    .week-ring svg { transform: rotate(-90deg); }
+    .week-ring .ring-label { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 900; font-size: 17px; }
+    .timer-bar { position: fixed; left: 50%; transform: translateX(-50%) translateY(24px); bottom: calc(84px + env(safe-area-inset-bottom)); width: min(400px, calc(100% - 24px)); background: rgba(9,9,15,.97); border: 1px solid rgba(34,211,238,.4); border-radius: 26px; padding: 16px; z-index: 45; box-shadow: 0 24px 60px rgba(0,0,0,.7); backdrop-filter: blur(14px); opacity: 0; visibility: hidden; pointer-events: none; transition: transform .28s ease, opacity .22s ease, visibility .22s; }
+    .timer-bar.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; pointer-events: auto; }
+    .timer-bar.rest { border-color: rgba(34,197,94,.45); }
+    .timer-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .timer-value { font-size: 44px; font-weight: 900; line-height: .95; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+    .timer-progress { height: 7px; background: rgba(255,255,255,.12); border-radius: 999px; overflow: hidden; margin-top: 12px; }
+    .timer-progress span { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #22d3ee, #6366f1); transition: width .3s linear; }
+    .timer-bar.rest .timer-progress span { background: linear-gradient(90deg, #22c55e, #14b8a6); }
+    .timer-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .timer-actions button { flex: 1; padding: 12px 8px; font-weight: 800; }
+    .set-btn.done { border-color: rgba(34,197,94,.5); color: #bbf7d0; background: rgba(34,197,94,.12); }
+    .set-btn.active { border-color: rgba(34,211,238,.9); color: #a5f3fc; }
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+    .cal-nav button { padding: 6px 12px; }
+    .round-block { border: 1px solid rgba(255,255,255,.08); border-radius: 22px; padding: 12px; margin-bottom: 12px; background: rgba(39,39,42,.55); }
+    .round-block.done { border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.07); }
+    .round-header { display: flex; justify-content: space-between; align-items: center; font-weight: 850; font-size: 15px; margin-bottom: 10px; color: #c4b5fd; }
+    .circuit-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 16px; background: #27272a; margin-bottom: 8px; border: 1px solid transparent; }
+    .circuit-row:last-child { margin-bottom: 0; }
+    .circuit-row.done { background: rgba(34,197,94,.14); }
+    .circuit-row.active { border-color: rgba(34,211,238,.9); background: rgba(34,211,238,.12); }
+    .circuit-row.up-next { border-color: rgba(167,139,250,.55); }
+    .circuit-row .set-btn { flex: 0 0 auto; width: 52px; text-align: center; padding: 12px 0; font-size: 15px; }
+    canvas.pxs { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+    .sprite { width: 100%; height: 100%; display: grid; place-items: center; }
+    .sprite canvas.pxs { max-width: 100%; max-height: 100%; }
+    .hero-commander { position: relative; width: 62px; height: 62px; flex: 0 0 auto; display: grid; place-items: center; }
+    .hero-commander canvas.pxs { position: relative; z-index: 1; filter: drop-shadow(0 0 12px var(--aura-glow, rgba(167,139,250,.85))); }
+    .hero-commander::before { content: ''; position: absolute; inset: -14px; border-radius: 999px; background: radial-gradient(circle, var(--aura-main, rgba(167,139,250,.3)), transparent 66%); animation: pulseAura 3.6s ease-in-out infinite; }
+    .level-row { display: flex; align-items: center; gap: 13px; }
+    .commander-name { color: #c4b5fd; font-size: 12px; font-weight: 700; margin-top: 3px; }
+    .grade-e { color: #94a3b8; } .grade-d { color: #60a5fa; } .grade-c { color: #818cf8; }
+    .grade-b { color: #a78bfa; } .grade-a { color: #c084fc; } .grade-s { color: #a5f3fc; }
+    .beast-card { position: relative; }
+    .beast-card.alpha { border-color: rgba(251,191,36,.55); box-shadow: 0 0 14px rgba(251,191,36,.18) inset; }
+    .alpha-mark { position: absolute; left: 5px; top: 5px; font-size: 9.5px; font-weight: 900; color: #fde68a; background: rgba(0,0,0,.6); padding: 2px 5px; border-radius: 999px; }
+    .shard-bar { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+    .shard-icons { display: flex; gap: 5px; }
+    .shard-icons span { width: 20px; height: 20px; opacity: .22; display: block; }
+    .shard-icons span.on { opacity: 1; filter: drop-shadow(0 0 6px rgba(165,243,252,.6)); }
+    .shard-icons canvas.pxs { width: 100% !important; height: 100% !important; }
+    /* chest */
+    .chest-stage { position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 6px 0 2px; overflow: hidden; }
+    .chest-rays { position: absolute; inset: -40%; opacity: 0; pointer-events: none; background: conic-gradient(from 0deg, transparent 0 8deg, rgba(255,255,255,.10) 8deg 12deg, transparent 12deg 24deg); animation: spinRays 9s linear infinite; }
+    @keyframes spinRays { to { transform: rotate(360deg); } }
+    .chest-stage.revealed .chest-rays { opacity: 1; transition: opacity .6s ease .1s; }
+    .chest-holder { position: relative; width: 170px; height: 156px; display: grid; place-items: center; }
+    .chest-svg { transition: opacity .4s ease; }
+    .chest-svg.shake { animation: chestShake .5s ease-in-out; }
+    @keyframes chestShake { 0%,100%{transform:translateX(0) rotate(0)} 20%{transform:translateX(-6px) rotate(-3deg)} 45%{transform:translateX(6px) rotate(3deg)} 70%{transform:translateX(-4px) rotate(-2deg)} }
+
+    .chest-burst { position: absolute; inset: 0; border-radius: 999px; opacity: 0; pointer-events: none; background: radial-gradient(circle, var(--drop-color, #a78bfa) 0%, transparent 62%); }
+    .chest-burst.go { animation: burstAnim .85s ease-out forwards; }
+    @keyframes burstAnim { 0%{opacity:0; transform:scale(.2)} 35%{opacity:.95; transform:scale(1.5)} 100%{opacity:0; transform:scale(2.6)} }
+    .chest-prize { position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; transform: scale(.3) translateY(20px); }
+    .chest-prize.go { animation: prizeAnim .7s cubic-bezier(.2,1.3,.4,1) forwards; }
+    @keyframes prizeAnim { to { opacity: 1; transform: scale(1) translateY(-12px); } }
+    .chest-prize canvas.pxs { filter: drop-shadow(0 0 16px var(--drop-color, #a78bfa)); }
+    .chest-prize.go canvas.pxs { animation: prizeLand .5s cubic-bezier(.3,1.6,.5,1) .1s both; }
+    @keyframes prizeLand { 0% { transform: scaleX(1.25) scaleY(.7); } 55% { transform: scaleX(.9) scaleY(1.12); } 100% { transform: none; } }
+    .chest-prize::before { content:''; position:absolute; width:140px; height:140px; border-radius:999px; background: radial-gradient(circle, var(--drop-color,#a78bfa) 0%, transparent 66%); opacity:.24; animation: pulseAura 2.4s ease-in-out infinite; }
+    .chest-grade { font-size: 11px; font-weight: 900; letter-spacing: 1.6px; text-transform: uppercase; min-height: 14px; }
+    .chest-name { font-size: 22px; font-weight: 900; letter-spacing: -.4px; min-height: 27px; }
+    .chest-sub { font-size: 13px; color: #a1a1aa; min-height: 36px; text-align: center; padding: 0 8px; }
+  </style>
+</head>
+<body>
+  <div class="floating-chibis" id="floatingChibis"></div>
+  <div class="app">
+    <section id="home" class="screen active">
+      <div class="hero">
+        <div class="hunter-aura" id="hunterAura"></div>
+        <div class="hero-art" id="heroArt"></div>
+        <div class="hero-content">
+          <div class="tag">⚔️ Shadow Hunter System</div>
+          <div class="level-row">
+            <div class="hero-commander" id="heroCommander"></div>
+            <div>
+              <h1 id="levelTitle">Level 1</h1>
+              <p class="subtitle" id="rankTitle">E-Rank: Hunter</p>
+              <p class="commander-name" id="commanderName"></p>
+            </div>
+          </div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+          <p class="xp-text" id="xpText">0 / 250 XP tot volgend level</p>
+          <p class="xp-text" id="nextUnlockText" style="margin-top:5px; color:#a5b4fc; font-weight:700;"></p>
+        </div>
+      </div>
+
+      <div class="card" style="padding:14px; margin-bottom:14px; background:rgba(79,70,229,.12); border:1px solid rgba(255,255,255,.08);">
+        <div id="systemMessage" style="font-weight:800; color:#c4b5fd; text-align:center;">
+          The System welcomes a new hunter.
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div>⭐</div><div class="value" id="xpStat">0</div><div class="label">XP</div></div>
+        <div class="stat"><div>🔥</div><div class="value" id="streakStat">0</div><div class="label">Week streak</div></div>
+        <div class="stat"><div>💪</div><div class="value" id="todayStat">0</div><div class="label">Vandaag</div></div>
+      </div>
+
+      <div class="card week-card">
+        <div class="week-ring" id="weekRing"></div>
+        <div>
+          <h2 style="font-size:19px;" id="weekTitle">Deze week</h2>
+          <p class="small" id="weekSub">—</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div><h2>Daily Quest</h2><p class="small">Voltooi je training om XP en shadow progress te krijgen.</p></div>
+          <div style="display:flex; gap:8px;">
+            <button class="ghost" onclick="skipDay()">Dag overgeslagen</button>
+            <button class="ghost" onclick="resetToday()">Reset</button>
+          </div>
+        </div>
+        <button class="primary" id="circuitBtn" style="margin-bottom:14px;" onclick="startCircuit()">Circuit starten</button>
+        <div id="exerciseList"></div>
+        <button class="primary" id="finishBtn" onclick="finishWorkout()">Workout afronden +100 XP</button>
+      </div>
+    </section>
+
+    <section id="rewards" class="screen">
+      <div class="card">
+        <h2>Shadow Army</h2>
+        <p class="small">Your unlocked shadow soldiers.</p>
+        <div id="activeCompanion"></div>
+        <div id="shadowSoldiers" class="rewards"></div>
+      </div>
+
+      <div class="card">
+        <h2>Shadow Beasts</h2>
+        <p class="small">Chests dropppen beesten van jouw rang of lager. Max 3 volgen je op het scherm.</p>
+        <div class="shard-bar">
+          <div class="shard-icons" id="shardIcons"></div>
+          <div class="small" id="shardText">—</div>
+        </div>
+        <div id="beastCollection" class="rewards" style="margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <section id="journal" class="screen">
+      <div class="card">
+        <h2>Hunter Journal</h2>
+        <p class="small">Your progression log tracked by the System.</p>
+        <div id="journalContent" style="display:grid; gap:12px; margin-top:14px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>Hunter Stats</h2>
+        <p class="small">Your build evolves with training.</p>
+        <div id="hunterStats" style="display:grid; gap:10px; margin-top:12px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>Hunter Rewards</h2>
+        <p class="small">Elke level ontgrendelt een nieuwe hunter/shadow reward kaart.</p>
+        <div class="rewards" id="rewardGrid"></div>
+      </div>
+
+      <div class="card">
+        <h2>Eigen shadow afbeelding</h2>
+        <p class="small">Gebruik een URL of upload een JPEG/PNG/WebP voor je homescreen.</p>
+        <input id="customImage" placeholder="Optionele afbeelding-URL" oninput="saveCustomImage()" />
+        <input id="customImageFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="saveCustomImageFile(event)" />
+        <button class="ghost" style="width:100%; margin-top:10px;" onclick="clearCustomImage()">Afbeelding verwijderen</button>
+      </div>
+    </section>
+
+    <section id="settings" class="screen">
+      <div class="card">
+        <h2>Training instellingen</h2>
+        <p class="small">Rusttijd tussen sets en je weekdoel.</p>
+        <div style="margin-top:14px;">
+          <div class="small" style="margin-bottom:6px; font-weight:800;">Rust tussen oefeningen</div>
+          <div id="restShortOptions" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;"></div>
+        </div>
+        <div style="margin-top:16px;">
+          <div class="small" style="margin-bottom:6px; font-weight:800;">Rust tussen rondes</div>
+          <div id="restLongOptions" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;"></div>
+        </div>
+        <div style="margin-top:16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div><strong>Automatisch doorgaan</strong><div class="small">Na de rust start de volgende oefening vanzelf</div></div>
+          <button class="ghost" id="autoToggle" onclick="toggleAutoAdvance()">—</button>
+        </div>
+        <div style="margin-top:16px;">
+          <div class="small" style="margin-bottom:6px; font-weight:800;">Trainingen per week (doel)</div>
+          <div id="targetOptions" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;"></div>
+        </div>
+        <div style="margin-top:16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div><strong>Geluid + trilling</strong><div class="small">Feedback bij sets en timers</div></div>
+          <button class="ghost" id="feedbackToggle" onclick="toggleFeedback()">—</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Backup</h2>
+        <p class="small">Je voortgang staat alleen in deze browser. Exporteer regelmatig — cache wissen betekent anders alles kwijt.</p>
+        <button class="primary" style="margin-top:12px;" onclick="exportSave()">Voortgang exporteren</button>
+        <button class="ghost" style="width:100%; margin-top:10px;" onclick="document.getElementById('importFile').click()">Backup importeren</button>
+        <input id="importFile" type="file" accept="application/json,.json" style="display:none;" onchange="importSave(event)" />
+        <div class="small" id="lastBackupInfo" style="margin-top:10px;"></div>
+      </div>
+
+
+    </section>
+
+    <section id="skills" class="screen">
+      <div class="card">
+        <h2>System Quests</h2>
+        <p class="small">Quests geven eenmalig extra XP en voelen als achievements.</p>
+        <div id="skillList"></div>
+      </div>
+      <button class="danger" onclick="hardReset()">Alles resetten</button>
+    </section>
+
+    <section id="bosses" class="screen">
+      <div class="card">
+        <h2>Promotion Trial</h2>
+        <p class="small">Reach the required level, defeat the trial, and earn your next rank.</p>
+        <div id="promotionBossBox" style="display:grid; gap:12px; margin-top:14px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>Monthly Boss Raids</h2>
+        <p class="small">Elite monthly challenges with massive rewards.</p>
+        <div id="bossList" style="display:grid; gap:12px; margin-top:14px;"></div>
+      </div>
+    </section>
+
+    <section id="dungeons" class="screen">
+      <div class="card">
+        <h2>Dungeons</h2>
+        <p class="small">Extra trainingen voor bonus XP en specifieke stats.</p>
+        <div id="dungeonList"></div>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab active" onclick="openScreen('home', this)">Status</button>
+      <button class="tab" onclick="openScreen('dungeons', this)">Dungeons</button>
+      <button class="tab" onclick="openScreen('bosses', this)">Bosses</button>
+      <button class="tab" onclick="openScreen('rewards', this)">Army</button>
+      <button class="tab" onclick="openScreen('journal', this)">Journal</button>
+      <button class="tab" onclick="openScreen('skills', this)">Quests</button>
+      <button class="tab" onclick="openScreen('settings', this)">Settings</button>
+    </nav>
+  </div>
+
+  <div class="timer-bar" id="timerBar">
+    <div class="timer-top">
+      <div>
+        <div class="small" id="timerLabel">Werk</div>
+        <div class="timer-value" id="timerValue">0:40</div>
+      </div>
+      <div class="small" id="timerContext" style="text-align:right; max-width:150px;"></div>
+    </div>
+    <div class="timer-progress"><span id="timerFill"></span></div>
+    <div class="timer-actions">
+      <button class="ghost" id="timerPause" onclick="toggleTimerPause()">Pauze</button>
+      <button class="ghost" onclick="timerFinishNow()">Klaar</button>
+      <button class="ghost" onclick="stopTimer(true)">Stop</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="chestModal">
+    <div class="modal" style="text-align:center;">
+      <div class="chest-stage" id="chestStage">
+        <div class="chest-rays"></div>
+        <div class="chest-holder">
+          <div class="chest-burst" id="chestBurst"></div>
+          <div id="chestArt"></div>
+          <div class="chest-prize" id="chestPrize"></div>
+        </div>
+        <div class="chest-grade" id="chestGrade"></div>
+        <div class="chest-name" id="chestName">Chest</div>
+        <div class="chest-sub" id="chestSub"></div>
+      </div>
+      <button class="primary" id="chestBtn" style="margin-top:8px;" onclick="chestAction()">Openen</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">+ XP</div>
+
+  <div class="modal-backdrop" id="infoModal" onclick="closeInfoModal(event)">
+    <div class="modal">
+      <h3 id="modalTitle">Oefening</h3>
+      <p id="modalBody">Beschrijving</p>
+      <button class="primary" onclick="hideInfoModal()">Sluiten</button>
+    </div>
+  </div>
+
+  <script>
+    const LEVEL_XP = 1000;
+
+    // ---------------- Pixel sprite engine ----------------
+    // Every sprite is a 32x32 grid of palette characters. Drawn once to an
+    // offscreen canvas, then blitted with integer scaling so it stays crisp
+    // at any size, and offset per frame for the idle animation.
+    const PX = {"fragment":{"r":["................................","................................","................................","................1...............","...............551..............","..............55541.............","............655554461...........","...........65555444441..........","..........6555554444441.........",".........6455f55444f4441........",".........645555524444441........",".........645522222224441........",".........f552222f2222441........",".........65522fffff22441........","........64522fff1fff22441.......","........645522fffff224441.......","........64552222f222244f1.......","........64555222222244441.......","........64455554244444441.......","........14455554444444441.......",".........144555444444441........","..........6455444444441.1.......","........1.6455444444441.........","..........1445444444441.........","...........14444444441...1......",".......1....644444441...........","............144444441...........",".............1444441......1.....","......1.......64441.............","...........1..14441.1...........","...............111..............","................................"],"k":"g","h":20,"s":[0,6],"n":"Shadow Fragment","t":"Level 1 \u00b7 je eerste schaduw","l":"Nog geen vorm, nog geen naam. E\u00e9n oog dat opengaat op de dag dat je voor het eerst niet overslaat.","a":"#dbeafe"},"iron":{"r":["................................","................................","................................","................................",".............5555551............",".............5556661............","............666655551...........","............555555551...........","...........55555555551..........","...........11111111111..........","...........11ggg1ggg11..........","...........11111111111..........","...........11111111111..........","...........55555555551..........","...........55222222251..........","1..........11111111111..........","5551............................","5ggg5551....555555551...........","5444gggg551.533333331...........","5444gg44gg5633333333361.........","5444gg4444543333333334461.......","5444gg44445444444444444441......","5444ggg44454444444444444441.....","544gg1gg445444444444444444461...","5444ggg4445444444444444444441...","5444gg44445444444444444444441...","5444gg444454444444444444444441..","1544gg444553333333333333334441..",".15544455533333333333333334441..","..55555553333333333333333334441.","..11111111111111111111111111111.","................................"],"k":"g","h":18,"s":[0,9],"n":"Iron","t":"Level 10 \u00b7 de eerste soldaat","l":"Draagt een schild dat groter is dan hijzelf. Heeft het nooit laten zakken, ook niet toen dat verstandiger was.","a":"#38bdf8"},"tank":{"r":["...........1.........1..........","...........51.......51..........","..........551..551..551.........","..........4555555555551.........",".........155555555555551........","..........5555555555551.........",".........555555555555551........",".........555555555555551........",".........55ee5555555ee51........","........55555ee555ee55551.......","........5555ee55455ee5551.......","........15555144444155551.......",".........555444444444551........",".........555444111444551........",".........154444444444451........","..........1584444444851.........","...........18444444481..........","............544444441...........","...1.....666444545444661....1...",".66461..e44e44e44e44e44e1.66461.","644444664e44e44e44e44e44e6444441","64444444444444444444444444444441","64444444444444444444444444444441","64444444444444444444444444444441","64444444444444444444444444444441","64444443333333333333333334444441","64444443333333333333333334444441","64444443333333333333333334444441","53333343333333333333333334333331","53333333333333333333333333333331","53333311111111111111111111333331","111111....................111111"],"k":"g","h":19,"s":[0,5],"n":"Tank","t":"Level 18 \u00b7 de muur","l":"Geen wapen, geen helm. Wat op hem afkomt breekt of keert om \u2014 er is geen derde optie.","a":"#f0a35a"},"igris":{"r":["..............abba1.............","..............6bba1.............","..............abbaa1............","............5aabbaaaaaaa1.......","............666bb66aaaaa1.......","...........56555555aabaaa1......","...........655555555bbbbb1......","..........5555555555bbb11...888.","..........1111144411111.....868.","..........11aaa454aaa11.....868.","..........11a1144411a11.....868.","..........1111144411111.....868.","..........5555555555551.....868.","..........5552222222551......688","..........1552121212551......688","...........15222222251.......688","............455555551........688","............523333321........688","..........6633333333361....44221","........66442222222224461..11111",".......6654444444444444561......","......665544444424444445561.....","....6655554444442444444555561...","..66555555544444244444555555561.",".5555555555444442444445555555551",".5555555555444442444445555555551",".1555555113333332333333115555551","..55551133333333233333333115551.","..55114333333333233333333341151.","..11443333333333233333333334411.","..11111111111111211111111111111.","................1..............."],"k":"g","h":17,"s":[27,31],"n":"Igris","t":"Level 28 \u00b7 knight commander","l":"De eerste die je opriep die terugkeek. Buigt niet uit angst maar uit erkenning \u2014 en staat weer op voordat je het bevel geeft.","a":"#e23e57"},"tusk":{"r":["...........................1....",".........................cccc1..","........................ccc1cc1.","........................ccc11c1.","..............6666661..1c11c11c1",".............644444441..cc11cc1.","............64544444441.1cc1cc1.","............65442444341..c1cc1..","...........6454222444341.1.c1...","..........645422222443441..531..",".........64542222222443441.51...",".........64522223222244341.51...",".........65422333332244341.51...",".........64423333333244431.51...",".........6448cc333cc844441.51...","........644483133313844444631...","........644283333333824444431...","........644283333333824444431...","........644228333338224444431...","........644221223221224444431...","........644428222228244444131...",".......5334444444444444441.51...","......53333333333333333333531...","....5533333333333333333333331...","....5333333333333333333333331...","....5333333333333333333333331...","...533333333333333333333333331..","...533322222222222222222223331..","...533322222222222222222223331..","..53332222222222222222222223331.","..11111111111111111111111113311.","...........................11..."],"k":"g","h":20,"s":[26,31],"n":"Tusk","t":"Level 40 \u00b7 high orc shaman","l":"De ring op zijn staf is het enige licht in je leger dat geen oog is. Hij dooft hem nooit.","a":"#4ade80"},"beru":{"r":[".....1....................1.....","......d1.................d31....","......131................531....",".......51................51.....",".......131..............531.....","........131.....1......531......",".........51....651.....51.......",".........131.6655561..531.......","..........53655555551.51........","..........64555555555641........",".........644555555555441........",".........6d45555555554d1........",".........6ddddd555ddddd1........",".........1d1ddd444ddd1d1........","..........ddddd444ddddd.........","..........dddd44444dddd.........","..........6444444444441.........","..........6444444444441.........","..........6444444444441.........","........66448444444484461.......",".......6444482444442844441......","......6444485555d5555844441.....","......644458555555555854441.....",".....64442822222222222824441....",".....64445855555555555854441....",".....64445555555555555554441....","....6444555555555555555554441...","....6444222222222222222224441...","....6444455555555555555544441...","....6444455555555555555544441...","...111111115555555555511111111..","...........11111111111.........."],"k":"g","h":18,"s":[0,7],"n":"Beru","t":"Level 55 \u00b7 ant king","l":"Was een koning voordat hij van jou was. Noemt je nog steeds bij een titel die niemand anders gebruikt.","a":"#e879f9"},"bellion":{"r":[".....1..........9..........1....","......51........9........51.....","......1251..9..999..9..5521.....",".......1555599.989.9955551......","........55598999999989551.......","........11999999999999911.......","..........9999999999999.........","..........9999999999999.........","..........5555555555551.........","..........1111144411111.........","..........1199945499911.........","..........1111144411111.........","..........1111144411111.........","....1.....5555555555551....1....",".....1....1552222222551...1.....",".....51....15212121251...51.....","....5331....522222221...5331....","....53331...533333331..53331....","...53333356633333333366333331...","...53333444433333333344443331...","..533334954444444444444594331...","..5333995544444424444445599331..","..5399555544444424444445555991..",".539555555544444244444555555591.",".555555555544444244444555555551.","53555555555444442444445555555551","11555555555333332333335555555511","..1555555333333323333333555551..","...555433333333323333333334551..","..64443333333333233333333334441.","..11111111111111211111111111111.","................1..............."],"k":"g","h":18,"s":[0,6],"n":"Bellion","t":"Level 75 \u00b7 grand marshal","l":"Het einde van de lijn. Er is geen rang boven hem omdat er niemand meer over was om die te dragen.","a":"#fbbf24"},"ravenling":{"r":["................................","................................","................................","................................","..........1.....................","........1.......................",".........1..1...................",".......66461....................","......6544441...................","..55555777441...................","..555557144441..................","..15555344441...................","...1111544441...................",".......14444461..1..............","........54444446641.............",".......6445444444441............",".......64443333333331...........","......6444443333333331..........","......6444443322223331..........","......1444443333332221..........",".......6444432222333331.........",".......1444433333222233551......","........1144433333344333335551..","..........14444441144333223331..","...........421121..111133322231.","...........41..41......11333321.","...........41..41........1113311","...........41..41...........11..","..........11111111..............","..........11111111..............","................................","................................"],"k":"b","h":16,"s":[22,31],"n":"Ravenling","t":"carrion crow","l":"Het eerste dat op een slagveld arriveert en het laatste dat vertrekt.","a":"#94a3b8"},"skitter":{"r":["................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","................................","........51..51......51..51......","........531.531....531.531......","....51.531353331..533353331.51..","....53531.63333355333333433531..","...5313476444433333333344333131.","...51.7444744443333333333331.51.","...51.6444444443333333333331.51.","...51.7447444443443333334431.51.","..583644444444444444333344331131","..54444444444444444444334431..51","..544444444444433333333333331.51",".5331444444444444444443334431.11",".538.531144111114444444331131..1",".51..51..51.....111444131..51..1",".51.531.531........111.531.131.1","531.51..531............131..51.1","51..11..51..............41..11..","11......11..............11......","................................","................................","................................"],"k":"b","h":16,"s":[0,5],"n":"Skitter","t":"tomb spider","l":"Weeft niet om te vangen. Weeft om te onthouden waar alles gevallen is.","a":"#94a3b8"},"cur":{"r":["..........1.....................","...1......1.....................","...1.....621....................","...41....621....................","..621....421....................","..6221..62221...................","..4221..62221...................","..42221.62221...................",".622221.42221...................",".1111111111411..................","...........1....................","....66666661....................","....64444441....................","1.6647774441....................","6644471444441...................","6444444444441...................","6444444444444666666661..........","14141444444444444444441.........",".8.8.631144443443443441.........",".153531..644434434434446551.....","..111111.644333333333331333551..",".........14433333333331.533331..","..........1433333333321.113331..","...........531331112221...11331.","...........51.51...4221.....111.","...........51.51...4221.........","...........51.51...4221.........","...........51.51...422241.......","...........534221.4222111.......","..........4222111.1111..........","..........1111..................","................................"],"k":"b","h":14,"s":[24,31],"n":"Cur","t":"mange jackal","l":"Te mager om te jagen, te koppig om te verhongeren. Volgde je drie nachten voordat je het doorhad.","a":"#94a3b8"},"direwolf":{"r":["................................",".........1......................","....1....1......................","....1...621.....................","...621..621.....................","...621..621.....................","...6221.4221....................","...4221.4221....................","..14444644441...................","...6444444441...................","...6555555441...................","...6444444441...................","1464477744441...................","5344471444441......1............","53444444444446666664661.....1...","53444444444444444444444655551...","144144444444444444444444333331..",".88.88344444444444444444333331..",".835833444444444444444444333331.","..11111344444433333333443333311.",".......6444444333333334433311...",".......11144443333333221111.....","..........6333333333321.........","..........6443331133321.........","..........644331..53321.........","..........644331..53321.........","..........644331..532221........","..........64422244222221........",".........533322222222211........",".........5333211111111..........",".........11111..................","................................"],"k":"b","h":14,"s":[23,31],"n":"Direwolf","t":"pack alpha","l":"Leidde ooit een roedel van veertien. Verloor er dertien in \u00e9\u00e9n nacht en bleef alsnog staan bij de veertiende.","a":"#60a5fa"},"tusker":{"r":["................................","................................","................................","................................","................................","................................","................................","............1.1.1.1.............","..........1.1.1.1.1.1...........","..........1.........1...........","............6666661.............",".........1.644444441............",".........664444444441...........","........644444444444461.........",".....6664444444444444441........",".666644444444444444444441.......",".6547774444444444444444441......",".5547144444444444444444441......","555448444444444444444444441.....","155448144844444444444444441.....","5555844448444444444444444441.1..","15558444484444444444444444441...","1155844484433333333333333331.1..","..1811148443333333333333331.....","...8...81433333333333333221.....",".......8.533333333333222221.....",".........53313331111122221......",".........531.531.....42221......",".........53342221....42221......","........422221111...42221.......","........11111.......11111.......","................................"],"k":"b","h":14,"s":[26,31],"n":"Tusker","t":"shadow boar","l":"Laadt in een rechte lijn en wijkt nooit. Heeft daardoor meer muren gesloopt dan vijanden.","a":"#60a5fa"},"stalker":{"r":["................................","................................","................................","................................","................................","................................","................................","................................","................................",".............................1..","..1.....1.....................1.","..61..1.61......................","..626646421...................51",".1444444441..................531","..644444441........1........531.","66477744441.........1..1...531..","6447144444466666666646641.531...","6444444444444444444444444631....","111444444444444444444444441.....","..1444444443333333333333331.....","...111414443333333333333331.....","......1.114333333333333221......","..........6433333333333221......","..........641331111133121.......","..........61.51.....51.41.......","..........61.51.....51.41.......","..........61.51.....51.41.......","..........644221....534221......",".........5332111...4222111......",".........5331......1111.........",".........1111...................","................................"],"k":"b","h":14,"s":[26,31],"n":"Stalker","t":"shadow panther","l":"Je hoort hem nooit aankomen. Dat is niet training \u2014 dat is wat hij is.","a":"#818cf8"},"adder":{"r":["................................","................................","................................","................................","................................","..........6666666666661.........","........66544444444445461.......","......664444444444444444461.....",".....54444444444444444444441....","...664444444444444444444444461..","...144333333333333333333333441..","....6444444444444444444444441...","....6444444555555555554444441...","....1444444555555555554444441...",".....64444455555555555444441....",".....53333357755555775333331....",".....14444447155555174444441....","......644444555555555444441.....","......114444555555555444411.....","........11445555555554411.......","..........1455555555541.........","...........11155555111.1........","..............55551...5351......","..............15551.55333351....","...............111.53333331.....","..............8..853333331......","..............8.583333331.......",".............53533333331........","...........153333331111.........","............1111111.............","................................","................................"],"k":"b","h":18,"s":[0,4],"n":"Adder","t":"hooded serpent","l":"Spreidt de kap als waarschuwing. Wie die waarschuwing negeert krijgt er geen tweede.","a":"#818cf8"},"ursine":{"r":["........1...............1.......","......66461...........66461.....","......64241....661....64241.....",".....14222466664446666422241....","......642444444444444444241.....","......114444444444444444411.....","........14554444444455441.......",".........644554444554441........",".........647144444417441........","........14447444444744441.......",".........644444454444441........",".........644455555554441........",".........144455111554441........","..........6455555555541.........","..........6445555555441.........",".........644458555854441........",".....1.6644444845484444461.1....","....6464444444444444444444641...","...644444444444444444444444441..","...644444444444444444444444441..","...644444444444444444444444441..","..14444444444444444444444444441.","...644443333333333333333344441..","...644443333333333333333344441..","...144443335333335333333344441..","....6444333353333353333334441...","...533343333353333353333343331..","...533333333335333335333333331..","...533333333333333333333333331..","...111111111111111111111111111..","................................","................................"],"k":"b","h":17,"s":[0,4],"n":"Ursine","t":"shadow bear","l":"Bewoog niet toen de grot instortte. Toen het puin geruimd was stond hij nog op dezelfde plek.","a":"#a78bfa"},"wyrm":{"r":[".....1..........................",".....61....1....................",".....61.1.641...................","....644646421...................","...64444444441..................","..6444444444441.................","..6444444444441.................","664477744444441.................","6444714444444441................","644444444444441.................","644444444444444661..............","18484344444444444461............",".1333344444444444444661.........","..113334444141144444441.........","....1454411.1..1114441..........",".....1111.........641...........","................66444661........","............66654454454451......","........666644444444444444661...","........644444441111144444441...","........14444111.....1144441....",".........1111..........1111.....","..............1.................","............55355551............","..........553333333355551.......","........553333333333333331......","......553333111111333333331.....","......533111......11113333351...","......111.............11111111..","................................","................................","................................"],"k":"b","h":12,"s":[26,31],"n":"Wyrm","t":"horned serpent","l":"Ouder dan de gate waarin je hem vond. Was er al voordat iemand die deur opende.","a":"#a78bfa"},"sabre":{"r":["................................","................................","................................","................................","................................","................................","................................","................................","..1......1......................","..61..1.641.....................",".6246646441....1................","144444444441.1..1...............",".6444444444464664661..........1.",".6454444444444444444661.......51","555777444444444444444441....5531","1557144444444444444444441.55311.","55555444444444444444444446311...","555554444444444444444444441.....","155554444444444444444444441.....",".88448844444444444444444441.....",".88118845433333333333333331.....",".8811881443333333333333331......",".881188.143333333333333221......",".881188..64433333333333221......",".881188..64413331111333221......",".8811.8..641.531....533221......","..8......641.531....533221......",".........641.531....5332221.....",".........64442221..42222111.....","........533321111..11111........","........11111...................","................................"],"k":"b","h":14,"s":[26,31],"n":"Sabre","t":"tusked hunter","l":"De slagtanden passen niet in zijn eigen kaak. Dat is geen ontwerpfout \u2014 dat is het punt.","a":"#c084fc"},"drake":{"r":["....1...........................","....1...1.......................","....61..1.......................","....61..61......................","....641.641.....................","....6446441................551..","....1111141............5555541..",".........1..........555554441...",".665555551.........55544244441..",".644444441........544444244441..",".644444441.1......5442444244441.","644477744461.....54442444244441.","644471444441....5444442442444441","644444444441....6444442444211111","644444444441...644444442111.....","6144444444441.6444444111........","8.84834444441.5444441...........","8538334444441.544441............","111113344444464444441...........",".....64444444444444441..........",".....11144444444444441..........","........64444444444434651.......",".......6443333333333343335551...",".......1443333333335313333331...","........1135555555531.13333331..","..........53333333111..11133331.","..........53111151........11331.","..........51....51..........111.","..........51....51..............",".........1111..1111.............",".........1111..1111.............","................................"],"k":"b","h":16,"s":[23,31],"n":"Drake","t":"winged wyrm","l":"Vliegt niet omdat het moet \u2014 vliegt omdat niets in de gate hoog genoeg reikt om het tegen te houden.","a":"#a5f3fc"},"rank_e":{"r":["................................","................................","................41..............","..............663341............","............6633333341..........","..........66333323333341........","........663333222223333341......","......6633332222222223333341....","....6633333222222222223333331...","....6333322222265222222233331...","....6332222222255222222222331...","....6332222222255222222222331...","....6332222222254222222222331...","....6332222222255222222222331...","....6332222222255222222222331...","....6332222222255222222222331...","....6332222222255222222222331...","....6332222222255222222222331...","....6332222222255222222222331...","....6332222244444444222222331...","....6332222244444444222222331...","....6332222222244222222222331...","....1333222222244222222223331...",".....11333222224422222233311....",".......1333322244222233331......","........11333225222233311.......","..........1333222223331.........","...........11333333311..........",".............1333331............","..............11311.............","................1...............","................................"],"k":"i","h":0,"s":[0,0],"n":"E-Rank: Hunter","t":"Level 1 \u00b7 gekerfde dolk","l":"Zes zijden, geen versiering. Het goedkoopste plaatje dat het systeem uitgeeft \u2014 en het enige dat iedereen krijgt.","a":"#8e7ed2"},"rank_d":{"r":["................................","................1...............","..............55341.............","............553333341...........","..........5533332333341.........","........55333322222333341.......","......553333322222223333341.....","....5533333222222222223333341...","...533333222222242222222333331..","...533332222244454442222233331..","...533222244445555544442222331..","...533222245555335555542222331..","...533222245553333355542222331..","...533222245335335533542222331..","...533222243555335555342222331..","...533222245555335555542222331..","...533222245553333355542222331..","...533222245335335533542222331..","...533222243555335555342222331..","...533222244555335555442222331..","...533222224455335554422222331..","...533222222445335544222222331..","...533322222244335442222223331..","...533333222224444422222333331..","....5533332222244422222333311...","......553333222222222333311.....","........53333222222233331.......",".........553333222333311........","...........53333333331..........","............553333311...........","..............55311.............","................1..............."],"k":"i","h":0,"s":[0,0],"n":"D-Rank: Fighter","t":"Level 10 \u00b7 geschraagd schild","l":"De plaat krijgt punten aan de zijkanten. Je hebt je eerste proef overleefd; dat is alles wat dit zegt.","a":"#8e7ed2"},"rank_c":{"r":["................41..............","..............553341............","............5533333341..........","..........55333323333341........","........553333222223333341......","......5533332222222223333341....","....55333322222222222223333341..","..55333382222222222222283333331.","..53333225522222222222552233331.","..53322225552222122225552222331.","..53322222555111611255522222331.","..53322222255566222555222222331.","..53322222285562222552222222331.","..53322222165552225552222222331.","..53322222166555255522222222331.","..53322222166655555222222222331.","..53322221866665552222222222331.","..53322222166655555222222222331.","..53322222166555255522222222331.","..53322222165556225552222222331.","..53322222285566666551222222331.","..53322222255566666555222222331.","..53322222555111611155522222331.","..53333225552222122225552233331.","..53333334522222222222453333311.","...55333332222222222222333311...",".....5533333222222222333311.....",".......553333322222333311.......",".........55333333333311.........","...........5533333311...........",".............553311.............","...............51..............."],"k":"i","h":0,"s":[0,0],"n":"C-Rank: Assassin","t":"Level 35 \u00b7 gekruiste klingen","l":"De afnemende maan achter de klingen. Dit is de rang waarop mensen het aan je gaan zien.","a":"#c9baff"},"rank_b":{"r":["...............641..............",".............6633341............","..........6663333333441.........","........66333333233333341.......",".....66633333322822333333441....","...663333332222555222233333341..",".6633333322222255522222233333341",".6333322222222255522222222233331",".6332222624222255522224262222331",".6332222444422255522244442222331",".6332222444422255522244442222331",".6332222244442555552444422222331",".6332222244442556552444422222331",".6332222224444555554444222222331",".6332222224444555554444222222331",".6332222222444455544442222222331",".6332222222444455544442222222331",".6332222222222222222222222222331",".6332222222222222222222222222331",".6332222222224455544222222222331",".6332222222222255522222222222331",".6332222222222255522222222222331",".6332222222222225222222222222331",".6332222222222225222222222222331",".6333322222222222222222222233331",".6633333322222222222222233333311","...663333332222222222233333311..",".....66633333322222333333111....","........66333333333333311.......","..........6663333333111.........",".............6633311............","...............611.............."],"k":"i","h":0,"s":[0,0],"n":"B-Rank: Slayer","t":"Level 90 \u00b7 drie klingen","l":"E\u00e9n kling voor elke rang die je achter je hebt gelaten. Het metaal wordt hier voor het eerst gepolijst.","a":"#c9baff"},"rank_a":{"r":["...............841..............","............888444441...........",".........888444444444441........","......888444444434444444441.....","...888444444433333334444444441..",".8844444443333332333333444444441",".8444443333333222223333333444441",".8443333333222226222223333333441",".8443333222222222222222223333441",".8443322622222222222222262233441",".8443322221111111111111222233441",".8443322211666661666661122233441",".8443322116661118111666112233441",".8443321166611881881166611233441",".8443311666611881881166661133441",".8443116666611881881166666113441",".8441166666118811188116666611441",".8443116666611881881166666113441",".8443311666611881881166661133441",".8443321166611881881166611233441",".8443322116661118111666112233441",".8443322211111111111111122233441",".8443322222222222222222222233441",".8443333622222222222222263333441",".8443333333222222222223333333441",".8444443333333226223333333444441",".8844444443333333333333444444411","...888444444433333334444444111..","......888444444444444444111.....",".........888444444444111........","............888444111...........","...............811.............."],"k":"i","h":0,"s":[0,0],"n":"A-Rank: Monarch","t":"Level 180 \u00b7 het open oog","l":"Het eerste insigne dat terugkijkt. Gespiegelde rand, en een oog dat niet meer dichtgaat.","a":"#f8fafc"},"rank_s":{"r":["...............941..............","...........99994444441..........",".......9999444444444444441......","...999944444444434444444444441..",".9944444444433333333344444444441",".9444444333333332333333334444441",".9443333333332229222333333333441",".9443333322222229222222233333441",".9443322222222299922222222233441",".9443322922222998992222292233441",".9443322992222999992222992233441",".9443322999222999992229992233441",".9443322998229999999228992233441",".9443322999999999999999992233441",".9443322999999999999999992233441",".9443329999999999999999999233441",".9443329999999999999999999233441",".9443329999999999999999999233441",".9443329999999999999999999233441",".9443329999999999999999999233441",".9443329999999999999999999233441",".9443329999929992999299999233441",".9443329999999999999999999233441",".9443322222222222222222222233441",".9443333322222227222222233333441",".9443333333332277722333333333441",".9444444333333377733333334444441",".9944444444433777773344444444411","...999944444444777444444441111..",".......9999444477744441111......","...........99994441111..........","...............911.............."],"k":"i","h":0,"s":[0,0],"n":"S-Rank: Shadow Monarch","t":"Level 500 \u00b7 de kroon","l":"Goud verschijnt precies \u00e9\u00e9n keer in het hele systeem, hier en bij Bellion. Er is niets boven dit.","a":"#fbbf24"},"chest_closed":{"r":["................................","................................","................................","................................","................................","................................","..........666655556661..........","........6646445445444461........",".......646644454454444441.......",".....6666444445445444444461.....",".....6644444445445444444441.....",".....6444444445445444444441.....","....64444444445445444444441.....","....555555555554455555555555....","....555555555554455555555555....","....555555555555555555555555....","....555555555226222555555555....","....555555555266622555555555....","....534433333661662333333441....","....534433333266622333333441....","....534433333226222333333441....","....134433333222222333333441....",".....5443333335445333333341.....",".....5443333335445333333341.....",".....5443333335445333333341.....",".....5443333335445333333341.....","....424422222254452222222441....","....424422222254452222222441....","....111111111155551111111111....","................................","................................","................................"],"k":"p","h":0,"s":[0,0]},"chest_open":{"r":["................................","................................","................................","................................","................................","................................","....555555555555555555555555....","....555555555555555555555555....","....144444444455554444444441....",".....6444444445555444444441.....",".....1111111115555111111111.....","..............5555..............",".....6666666666666666666666.....",".....6688888888888888888866.....",".....6688888888888888888866.....","....666666666666666666666666....","....666666666666666666666666....","....555555555555555555555555....","....534433333354453333333441....","....534433333354453333333441....","....534433333354453333333441....","....134433333354453333333441....",".....5443333335445333333341.....",".....5443333335445333333341.....",".....5443333335445333333341.....",".....5443333335445333333341.....","....424422222254452222222441....","....424422222254452222222441....","....111111111155551111111111....","................................","................................","................................"],"k":"p","h":0,"s":[0,0]},"shard":{"r":["................................","................................","................................","................................","................8...............","................1...............","...............641..............","...............641..............","..............64641.............","..............64641.............",".............6466641............",".............6466641............","............644666441...........","............646666641...........",".........666446686644661........",".......6644444666664444461......","....1114444444466644444444111...",".......1144444466644444411......",".........111444666444111........","............644464441...........","............144444441...........",".............6444441............",".............1444441............","..............64441.............","..............14441.............","...............641..............","...............141..............","................1...............","................................","................................","................................","................................"],"k":"p","h":0,"s":[0,0]}};
+
+    const PX_PAL = {
+      '1':'#0b0a18','2':'#272248','3':'#423974','4':'#6659a4','5':'#8e7ed2',
+      '6':'#c9baff','7':'#a5f3fc','8':'#f8fafc','9':'#fbbf24',
+      'a':'#e23e57','b':'#8a1c30','c':'#4ade80','d':'#e879f9',
+      'e':'#f0a35a','f':'#dbeafe','g':'#38bdf8'
+    };
+
+    const pxCache = {};
+
+    function pxSource(key, blink) {
+      const id = key + (blink ? ':b' : '');
+      if (pxCache[id]) return pxCache[id];
+      const data = PX[key];
+      if (!data) return null;
+      const off = document.createElement('canvas');
+      off.width = 32; off.height = 32;
+      const ctx = off.getContext('2d');
+      if (!ctx) return null;
+      for (let y = 0; y < 32; y++) {
+        const row = data.r[y];
+        for (let x = 0; x < 32; x++) {
+          let ch = row[x];
+          if (ch === '.') continue;
+          if (blink && (ch === '7' || ch === 'a' || ch === 'c' || ch === 'd' || ch === 'e' || ch === 'f' || ch === 'g')) ch = '3';
+          ctx.fillStyle = PX_PAL[ch] || '#423974';
+          ctx.fillRect(x, y, 1, 1);
+        }
+      }
+      pxCache[id] = off;
+      return off;
+    }
+
+    // Returns markup; the animation loop finds these and paints them.
+    function pxTag(key, scale, extraClass, extraStyle) {
+      if (!PX[key]) return '';
+      const size = 32 * scale;
+      return `<canvas class="pxs ${extraClass || ''}" width="${size}" height="${size}"
+        style="width:${size}px;height:${size}px;${extraStyle || ''}"
+        data-sprite="${key}" data-scale="${scale}"></canvas>`;
+    }
+
+    function pxAura(key) {
+      return (PX[key] && PX[key].a) || '#a78bfa';
+    }
+
+    function pxPaint(el, t) {
+      const key = el.dataset.sprite;
+      const data = PX[key];
+      if (!data) return;
+      const scale = parseInt(el.dataset.scale, 10);
+      const ctx = el.getContext('2d');
+      if (!ctx) return;
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, el.width, el.height);
+
+      const still = data.k === 'i' || data.k === 'p';
+      let phase = el._phase;
+      if (phase === undefined) { phase = el._phase = Math.random() * 6.28; el._blinkAt = 1800 + Math.random() * 3600; }
+
+      let bob = 0, chest = 0, blink = false;
+      if (!still && !document.hidden) {
+        const beat = Math.sin(t / 620 + phase);
+        bob = beat > 0.35 ? 1 : 0;
+        chest = beat > 0.7 ? 1 : 0;
+        el._blinkAt -= 16;
+        if (el._blinkAt <= 0) { el._blinking = 130; el._blinkAt = 2600 + Math.random() * 3800; }
+        if (el._blinking > 0) { el._blinking -= 16; blink = true; }
+      }
+
+      const src = pxSource(key, blink);
+      if (!src) return;
+      const split = data.h || 0;
+
+      if (split > 0) {
+        // body first, then the head one pixel behind it, so it reads as breathing
+        ctx.drawImage(src, 0, split, 32, 32 - split, 0, (split + bob) * scale, 32 * scale, (32 - split) * scale);
+        ctx.drawImage(src, 0, 0, 32, split, 0, (bob + chest) * scale, 32 * scale, split * scale);
+      } else {
+        ctx.drawImage(src, 0, bob * scale, 32 * scale, 32 * scale);
+      }
+
+      // motes drift up in the sprite's own accent, only where there is room
+      if (!still && scale >= 3 && !document.hidden) {
+        if (!el._motes) el._motes = [];
+        if (el._motes.length < 3 && Math.random() < 0.035) {
+          el._motes.push({ x: 5 + Math.random() * 22, y: 30, life: 0, max: 55 + Math.random() * 45 });
+        }
+        el._motes = el._motes.filter(m => {
+          m.life++; m.y -= 0.09; m.x += Math.sin(m.life / 14) * 0.05;
+          return m.life < m.max;
+        });
+        ctx.fillStyle = pxAura(key);
+        for (const m of el._motes) {
+          ctx.globalAlpha = (1 - m.life / m.max) * 0.7;
+          ctx.fillRect(Math.round(m.x) * scale, Math.round(m.y) * scale, scale, scale);
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function pxLoop(t) {
+      const nodes = document.querySelectorAll('canvas[data-sprite]');
+      for (const el of nodes) pxPaint(el, t);
+      requestAnimationFrame(pxLoop);
+    }
+
+    // ---- Shadow beasts: chest drops, graded and capped by rank ----
+    const beastPool = [
+      { id: 'ravenling', name: 'Ravenling', type: 'carrion crow',    grade: 'E' },
+      { id: 'skitter',   name: 'Skitter',   type: 'tomb spider',     grade: 'E' },
+      { id: 'cur',       name: 'Cur',       type: 'mange jackal',    grade: 'E' },
+      { id: 'direwolf',  name: 'Direwolf',  type: 'pack alpha',      grade: 'D' },
+      { id: 'tusker',    name: 'Tusker',    type: 'shadow boar',     grade: 'D' },
+      { id: 'stalker',   name: 'Stalker',   type: 'shadow panther',  grade: 'C' },
+      { id: 'adder',     name: 'Adder',     type: 'hooded serpent',  grade: 'C' },
+      { id: 'ursine',    name: 'Ursine',    type: 'shadow bear',     grade: 'B' },
+      { id: 'wyrm',      name: 'Wyrm',      type: 'horned serpent',  grade: 'B' },
+      { id: 'sabre',     name: 'Sabre',     type: 'tusked hunter',   grade: 'A' },
+      { id: 'drake',     name: 'Drake',     type: 'winged wyrm',     grade: 'S' }
+    ];
+
+    const gradeOrder = ['E', 'D', 'C', 'B', 'A', 'S'];
+    const gradeColor = { E: '#94a3b8', D: '#60a5fa', C: '#818cf8', B: '#a78bfa', A: '#c084fc', S: '#a5f3fc' };
+
+    // empty% plus weights per grade; grades above your rank can never appear
+    const chestTable = {
+      'E-Rank': { empty: 65, weights: { E: 35 } },
+      'D-Rank': { empty: 55, weights: { E: 30, D: 15 } },
+      'C-Rank': { empty: 48, weights: { E: 25, D: 17, C: 10 } },
+      'B-Rank': { empty: 40, weights: { E: 20, D: 18, C: 14, B: 8 } },
+      'A-Rank': { empty: 32, weights: { E: 16, D: 16, C: 16, B: 12, A: 8 } },
+      'S-Rank': { empty: 25, weights: { E: 12, D: 14, C: 14, B: 15, A: 12, S: 8 } }
+    };
+
+    const SHARDS_FOR_GUARANTEE = 5;
+
+    // old chibi ids -> new beasts, so existing saves keep their collection
+    const beastMigration = {
+      wisp: 'ravenling', slime: 'skitter', bat: 'cur', wolf: 'direwolf', knight: 'tusker',
+      reaper: 'stalker', igrisChibi: 'adder', dragon: 'drake', monarchSpirit: 'sabre'
+    };
+
+    const shadowSoldiers = [
+      { level: 1, name: 'Shadow Fragment', key: 'fragment' },
+      { level: 10, name: 'Iron', key: 'iron' },
+      { level: 18, name: 'Tank', key: 'tank' },
+      { level: 28, name: 'Igris', key: 'igris' },
+      { level: 40, name: 'Tusk', key: 'tusk' },
+      { level: 55, name: 'Beru', key: 'beru' },
+      { level: 75, name: 'Bellion', key: 'bellion' }
+    ];
+
+    const auraStages = [
+      { level: 1, aura: 'Awakened Glow' },
+      { level: 10, aura: 'Blue Aura' },
+      { level: 18, aura: 'Assassin Aura' },
+      { level: 28, aura: 'Monarch Energy' },
+      { level: 40, aura: 'Shadow Aura' },
+      { level: 75, aura: 'True Monarch Presence' }
+    ];
+
+    const rewards = [
+      { level: 1, xp: 0, title: 'E-Rank: Hunter', badge: 'e', requirement: 'Beginner' },
+      { level: 10, xp: 9000, title: 'D-Rank: Fighter', badge: 'd', requirement: 'Fitter voelen' },
+      { level: 35, xp: 34000, title: 'C-Rank: Assassin', badge: 'c', requirement: 'Zichtbaar verschil' },
+      { level: 90, xp: 89000, title: 'B-Rank: Slayer', badge: 'b', requirement: 'Aesthetic / athletic physique' },
+      { level: 180, xp: 179000, title: 'A-Rank: Monarch', badge: 'a', requirement: 'Sterk en zeer fit' },
+      { level: 500, xp: 499000, title: 'S-Rank: Shadow Monarch', badge: 's', requirement: 'Elite natural physique • jarenlange consistentie' },
+      
+    ];
+
+    const rankWorkouts = {
+      'E-Rank: Hunter': [
+        { id: 1, name: 'Narrow Split Squat', target: '20 sec links + 20 sec rechts', sets: 3, xp: 18 },
+        { id: 2, name: 'Negative Push-up', target: '40 sec controlled reps', sets: 3, xp: 22 },
+        { id: 3, name: 'Alternate Compressions', target: '40 sec', sets: 3, xp: 18 },
+        { id: 4, name: 'Cossack Lunges', target: '40 sec alternating', sets: 3, xp: 20 },
+        { id: 5, name: 'Half Hollow Hold', target: '40 sec hold', sets: 3, xp: 22 }
+      ],
+      'D-Rank: Fighter': [
+        { id: 1, name: 'Split Squat', target: '25 sec links + 25 sec rechts', sets: 3, xp: 25 },
+        { id: 2, name: 'Slow Push-up', target: '50 sec controlled reps', sets: 3, xp: 30 },
+        { id: 3, name: 'Alternate Compressions', target: '50 sec', sets: 3, xp: 25 },
+        { id: 4, name: 'Deep Cossack Lunges', target: '50 sec alternating', sets: 3, xp: 28 },
+        { id: 5, name: 'Hollow Hold', target: '40 sec hold', sets: 3, xp: 30 }
+      ],
+      'C-Rank: Assassin': [
+        { id: 1, name: 'Tempo Split Squat', target: '50 sec alternating', sets: 3, xp: 35 },
+        { id: 2, name: 'Push-up', target: '50 sec', sets: 3, xp: 40 },
+        { id: 3, name: 'Compression Pulses', target: '50 sec', sets: 3, xp: 35 },
+        { id: 4, name: 'Cossack Lunges', target: '50 sec deep range', sets: 3, xp: 38 },
+        { id: 5, name: 'Hollow Body Hold', target: '45 sec hold', sets: 3, xp: 40 }
+      ],
+      'B-Rank: Slayer': [
+        { id: 1, name: 'Bulgarian Split Squat', target: '50 sec alternating', sets: 3, xp: 55 },
+        { id: 2, name: 'Diamond / Decline Push-up', target: '50 sec', sets: 3, xp: 60 },
+        { id: 3, name: 'V-Sit Compressions', target: '45 sec', sets: 3, xp: 55 },
+        { id: 4, name: 'Explosive Cossack Lunges', target: '50 sec', sets: 3, xp: 55 },
+        { id: 5, name: 'Hollow Rocks', target: '45 sec', sets: 3, xp: 60 }
+      ],
+      'A-Rank: Monarch': [
+        { id: 1, name: 'Assisted Pistol Squat', target: '50 sec alternating', sets: 3, xp: 80 },
+        { id: 2, name: 'Archer Push-up', target: '50 sec', sets: 3, xp: 90 },
+        { id: 3, name: 'Advanced Compressions', target: '50 sec', sets: 3, xp: 80 },
+        { id: 4, name: 'Cossack Squat Hold + Reps', target: '50 sec', sets: 3, xp: 80 },
+        { id: 5, name: 'Full Hollow Hold', target: '50 sec hold', sets: 3, xp: 90 }
+      ],
+      'S-Rank: Shadow Monarch': [
+        { id: 1, name: 'Pistol Squat Progression', target: '60 sec alternating', sets: 3, xp: 120 },
+        { id: 2, name: 'Handstand Push-up Progression', target: '60 sec', sets: 3, xp: 140 },
+        { id: 3, name: 'L-Sit Compressions', target: '50 sec', sets: 3, xp: 120 },
+        { id: 4, name: 'Explosive Cossack Lunges', target: '60 sec', sets: 3, xp: 120 },
+        { id: 5, name: 'Hollow Rocks / Dragon Prep', target: '60 sec', sets: 3, xp: 140 }
+      ],
+      'Shadow Commander': [
+        { id: 1, name: 'Strict Pistol Squats', target: '60 sec alternating', sets: 3, xp: 150 },
+        { id: 2, name: 'Wall Handstand Push-ups', target: '60 sec', sets: 3, xp: 170 },
+        { id: 3, name: 'Advanced L-Sit Compressions', target: '60 sec', sets: 3, xp: 150 },
+        { id: 4, name: 'Cossack Plyo Lunges', target: '60 sec', sets: 3, xp: 150 },
+        { id: 5, name: 'Dragon Flag Negative Prep', target: '60 sec', sets: 3, xp: 170 }
+      ],
+      'Shadow Monarch': [
+        { id: 1, name: 'Pistol Squat Mastery', target: '60 sec', sets: 3, xp: 180 },
+        { id: 2, name: 'Handstand Push-ups', target: '60 sec', sets: 3, xp: 200 },
+        { id: 3, name: 'V-Sit / L-Sit Compression', target: '60 sec', sets: 3, xp: 180 },
+        { id: 4, name: 'Explosive Cossack Flow', target: '60 sec', sets: 3, xp: 180 },
+        { id: 5, name: 'Dragon Flag Negative', target: '60 sec', sets: 3, xp: 200 }
+      ]
+    };
+
+    const dungeons = [
+      // E-RANK
+      {
+        id: 'e-upper', rank: 'E-Rank', category: 'Upper Body', title: 'E-Rank Upper Dungeon', difficulty: 'Easy', xp: 60,
+        workout: ['Wall Push-ups • 40s (constant tempo tegen muur)', 'Negative Push-ups • 40s (langzaam zakken, snel omhoog indien nodig op knieën)', 'Knee Push-ups • 40s']
+      },
+      {
+        id: 'e-core', rank: 'E-Rank', category: 'Core', title: 'E-Rank Core Dungeon', difficulty: 'Easy', xp: 60,
+        workout: ['Dead Bug • 40s', 'Half Hollow Hold • 40s', 'Plank • 40s']
+      },
+      {
+        id: 'e-lower', rank: 'E-Rank', category: 'Lower Body', title: 'E-Rank Lower Dungeon', difficulty: 'Easy', xp: 60,
+        workout: ['Bodyweight Squats • 40s', 'Split Squats • 40s', 'Glute Bridges • 40s']
+      },
+
+      // D-RANK
+      {
+        id: 'd-upper', rank: 'D-Rank', category: 'Upper Body', title: 'D-Rank Upper Dungeon', difficulty: 'Moderate', xp: 110,
+        workout: ['Push-ups • 45s', 'Diamond Push-ups • 40s', 'Pike Push-ups • 40s']
+      },
+      {
+        id: 'd-core', rank: 'D-Rank', category: 'Core', title: 'D-Rank Core Dungeon', difficulty: 'Moderate', xp: 110,
+        workout: ['Hollow Hold • 45s (onderrug in vloer gedrukt houden)', 'Compression Pulses • 45s', 'Plank Shoulder Taps • 40s']
+      },
+      {
+        id: 'd-lower', rank: 'D-Rank', category: 'Lower Body', title: 'D-Rank Lower Dungeon', difficulty: 'Moderate', xp: 110,
+        workout: ['Split Squats • 50s', 'Cossack Lunges • 45s', 'Squat Hold • 45s']
+      },
+
+      // C-RANK
+      {
+        id: 'c-upper', rank: 'C-Rank', category: 'Upper Body', title: 'C-Rank Upper Dungeon', difficulty: 'Medium', xp: 180,
+        workout: ['Push-ups • 50s (constant gecontroleerd tempo zonder volledige rust)', 'Decline Push-ups • 50s', 'Pike Push-ups • 50s']
+      },
+      {
+        id: 'c-core', rank: 'C-Rank', category: 'Core', title: 'C-Rank Core Dungeon', difficulty: 'Medium', xp: 180,
+        workout: ['Hollow Rocks • 50s', 'Compression Pulses • 50s', 'Leg Raises • 45s']
+      },
+      {
+        id: 'c-lower', rank: 'C-Rank', category: 'Lower Body', title: 'C-Rank Lower Dungeon', difficulty: 'Medium', xp: 180,
+        workout: ['Tempo Split Squats • 50s', 'Deep Cossack Lunges • 50s', 'Jump Squats • 45s']
+      },
+
+      // B-RANK
+      {
+        id: 'b-upper', rank: 'B-Rank', category: 'Upper Body', title: 'B-Rank Upper Dungeon', difficulty: 'Hard', xp: 300,
+        workout: ['Decline Push-ups • 60s', 'Pseudo Push-ups • 50s', 'Archer Push-up Prep • 45s']
+      },
+      {
+        id: 'b-core', rank: 'B-Rank', category: 'Core', title: 'B-Rank Core Dungeon', difficulty: 'Hard', xp: 300,
+        workout: ['L-Sit Tuck Hold • 40s', 'Hollow Rocks • 60s', 'Compression Pulses • 60s']
+      },
+      {
+        id: 'b-lower', rank: 'B-Rank', category: 'Lower Body', title: 'B-Rank Lower Dungeon', difficulty: 'Hard', xp: 300,
+        workout: ['Bulgarian Split Squats • 60s', 'Explosive Cossack Lunges • 50s', 'Jump Squats • 60s']
+      },
+
+      // A-RANK
+      {
+        id: 'a-upper', rank: 'A-Rank', category: 'Upper Body', title: 'A-Rank Upper Dungeon', difficulty: 'Very Hard', xp: 500,
+        workout: ['Archer Push-ups • 60s', 'Deep Pike Push-ups • 60s', 'Pseudo Push-ups • 60s']
+      },
+      {
+        id: 'a-core', rank: 'A-Rank', category: 'Core', title: 'A-Rank Core Dungeon', difficulty: 'Very Hard', xp: 500,
+        workout: ['L-Sit Hold • 45s', 'V-Sit Compression • 60s', 'Full Hollow Hold • 60s']
+      },
+      {
+        id: 'a-lower', rank: 'A-Rank', category: 'Lower Body', title: 'A-Rank Lower Dungeon', difficulty: 'Very Hard', xp: 500,
+        workout: ['Assisted Pistol Squats • 60s', 'Explosive Lunges • 60s', 'Deep Cossack Squats • 60s']
+      },
+
+      // S-RANK
+      {
+        id: 's-upper', rank: 'S-Rank', category: 'Upper Body', title: 'S-Rank Upper Dungeon', difficulty: 'Extreme', xp: 900,
+        workout: ['Handstand Push-up Progression • 60s', 'Archer Push-ups • 60s', 'Explosive Push-ups • 60s']
+      },
+      {
+        id: 's-core', rank: 'S-Rank', category: 'Core', title: 'S-Rank Core Dungeon', difficulty: 'Extreme', xp: 900,
+        workout: ['Advanced L-Sit • 60s', 'Dragon Flag Negative • 60s', 'V-Sit Compression • 60s']
+      },
+      {
+        id: 's-lower', rank: 'S-Rank', category: 'Lower Body', title: 'S-Rank Lower Dungeon', difficulty: 'Extreme', xp: 900,
+        workout: ['Strict Pistol Squats • 60s', 'Explosive Cossack Flow • 60s', 'Jump Squat Burnout • 60s']
+      }
+    ];
+
+    const promotionBosses = [
+      {
+        id: 'promoD',
+        fromRank: 'E-Rank: Hunter',
+        toRank: 'D-Rank: Fighter',
+        requiredLevel: 10,
+        name: 'Goblin Commander Trial',
+        xp: 500,
+        workout: [
+          'Phase 1 • Narrow split squat test • 3 rounds',
+          'Phase 2 • Negative push-up endurance • 3 rounds',
+          'Phase 3 • Hollow hold + plank control • 3 rounds',
+          'Final Phase • Full E-rank circuit without skipping sets'
+        ]
+      },
+      {
+        id: 'promoC',
+        fromRank: 'D-Rank: Fighter',
+        toRank: 'C-Rank: Assassin',
+        requiredLevel: 35,
+        name: 'Shadow Beast Trial',
+        xp: 1000,
+        workout: [
+          'Phase 1 • Push-up control circuit • 4 rounds',
+          'Phase 2 • Split squat + cossack endurance • 4 rounds',
+          'Phase 3 • Hollow hold test • 4 rounds',
+          'Final Phase • D-rank full body gauntlet'
+        ]
+      },
+      {
+        id: 'promoB',
+        fromRank: 'C-Rank: Assassin',
+        toRank: 'B-Rank: Slayer',
+        requiredLevel: 90,
+        name: 'Demon Knight Trial',
+        xp: 1800,
+        workout: [
+          'Phase 1 • Push-up / pike push-up gauntlet',
+          'Phase 2 • Tempo split squat endurance',
+          'Phase 3 • Hollow rocks + compression pulses',
+          'Final Phase • C-rank assassin circuit'
+        ]
+      },
+      {
+        id: 'promoA',
+        fromRank: 'B-Rank: Slayer',
+        toRank: 'A-Rank: Monarch',
+        requiredLevel: 180,
+        name: 'Monarch Gate Trial',
+        xp: 3000,
+        workout: [
+          'Phase 1 • Pseudo push-up and archer prep test',
+          'Phase 2 • Bulgarian split squat endurance',
+          'Phase 3 • L-sit tuck and hollow burnout',
+          'Final Phase • B-rank slayer gauntlet'
+        ]
+      },
+      {
+        id: 'promoS',
+        fromRank: 'A-Rank: Monarch',
+        toRank: 'S-Rank: Shadow Monarch',
+        requiredLevel: 500,
+        name: 'Shadow Monarch Trial',
+        xp: 6000,
+        workout: [
+          'Phase 1 • Handstand / pike strength test',
+          'Phase 2 • Pistol squat progression test',
+          'Phase 3 • L-sit and advanced hollow endurance',
+          'Final Phase • A-rank monarch gauntlet'
+        ]
+      }
+    ];
+
+    const monthlyBosses = [
+      {
+        id: 'demonCastle',
+        name: 'Demon Castle Raid',
+        rank: 'C/B-Rank Raid',
+        requirement: 'Level 12+',
+        xp: 800,
+        duration: '45-60 min',
+        workout: [
+          'Phase 1 • Push-up endurance circuit • 10 min (30s push-ups / 15s rust herhalen gedurende 10 min)',
+          'Phase 2 • Split squat + cossack circuit • 12 min (40s split squats + 40s cossack lunges + 20s rust)',
+          'Phase 3 • Hollow hold burnout • 8 min (40s hollow hold / 20s rust)',
+          'Phase 4 • Full body finisher AMRAP • 15 min (zoveel mogelijk rondes van squats, push-ups en hollow rocks)'
+        ]
+      },
+      {
+        id: 'monarchTrial',
+        name: 'Monarch Trial',
+        rank: 'A-Rank Raid',
+        requirement: 'Level 28+',
+        xp: 1500,
+        duration: '60-75 min',
+        workout: [
+          'Phase 1 • Archer push-up circuit • 15 min (40s archer push-up progressions / 20s rust)',
+          'Phase 2 • Pistol squat progression • 15 min (controlled pistol squat attempts en holds)',
+          'Phase 3 • L-sit + compression endurance • 15 min (L-sit holds + compression pulses)',
+          'Phase 4 • Shadow endurance finisher • 20 min (full body endurance circuit zonder lange rust)'
+        ]
+      },
+      {
+        id: 'shadowWar',
+        name: 'Shadow War',
+        rank: 'S-Rank Raid',
+        requirement: 'Level 45+',
+        xp: 3000,
+        duration: '90+ min',
+        workout: [
+          'Phase 1 • Elite push circuit • 20 min (explosive push-ups, decline push-ups en pike push-ups)',
+          'Phase 2 • Core destruction circuit • 20 min (dragon flag prep, hollow rocks en compression holds)',
+          'Phase 3 • Advanced leg endurance • 20 min (pistol squats, jump squats en cossack flows)',
+          'Final Phase • Monarch gauntlet • 30 min (lange full-body burnout zonder volledige recovery)'
+        ]
+      }
+    ];
+
+    const skills = [
+      // E-RANK
+      { id: 'firstWorkout', rank: 'E-Rank', name: 'Quest: eerste workout voltooid', xp: 75 },
+      { id: 'push15', rank: 'E-Rank', name: 'Quest: 15 push-ups', xp: 100 },
+      { id: 'plank30', rank: 'E-Rank', name: 'Quest: 30 seconden plank', xp: 80 },
+      { id: 'splitHold', rank: 'E-Rank', name: 'Quest: split squat hold 40 sec', xp: 120 },
+      { id: 'week4', rank: 'E-Rank', name: 'Quest: 4 workouts in één week', xp: 180 },
+
+      // D-RANK
+      { id: 'plank60', rank: 'D-Rank', name: 'Quest: 1 minuut plank', xp: 180 },
+      { id: 'negativePullup', rank: 'D-Rank', name: 'Quest: negative pull-up', xp: 220 },
+      { id: 'push25', rank: 'D-Rank', name: 'Quest: 25 push-ups', xp: 250 },
+      { id: 'deepSquat', rank: 'D-Rank', name: 'Quest: deep squat hold 60 sec', xp: 250 },
+      { id: 'streak7', rank: 'D-Rank', name: 'Quest: 7 day streak', xp: 300 },
+
+      // C-RANK
+      { id: 'push30', rank: 'C-Rank', name: 'Quest: 30 push-ups in één set', xp: 350 },
+      { id: 'realPullup', rank: 'C-Rank', name: 'Quest: eerste echte pull-up', xp: 500 },
+      { id: 'hollow90', rank: 'C-Rank', name: 'Quest: hollow hold 90 sec', xp: 450 },
+      { id: 'pikePushup', rank: 'C-Rank', name: 'Quest: 10 pike push-ups', xp: 500 },
+      { id: 'cDungeon', rank: 'C-Rank', name: 'Quest: clear 5 C-rank dungeons', xp: 600 },
+
+      // B-RANK
+      { id: 'dips', rank: 'B-Rank', name: 'Quest: 10 dips', xp: 700 },
+      { id: 'lSit', rank: 'B-Rank', name: 'Quest: L-sit 10 seconden', xp: 800 },
+      { id: 'pseudoPushup', rank: 'B-Rank', name: 'Quest: pseudo push-up mastery', xp: 800 },
+      { id: 'bulgarian', rank: 'B-Rank', name: 'Quest: Bulgarian split squat 60 sec', xp: 800 },
+      { id: 'streak14', rank: 'B-Rank', name: 'Quest: 14 workout streak', xp: 900 },
+
+      // A-RANK
+      { id: 'handstand', rank: 'A-Rank', name: 'Quest: handstand 5 seconden', xp: 1200 },
+      { id: 'pistol', rank: 'A-Rank', name: 'Quest: assisted pistol squat', xp: 1400 },
+      { id: 'archer', rank: 'A-Rank', name: 'Quest: archer push-up', xp: 1500 },
+      { id: 'lSit30', rank: 'A-Rank', name: 'Quest: L-sit 30 seconden', xp: 1600 },
+      { id: 'aDungeon', rank: 'A-Rank', name: 'Quest: clear 10 A-rank dungeons', xp: 1800 },
+
+      // S-RANK
+      { id: 'muscleup', rank: 'S-Rank', name: 'Quest: eerste muscle-up', xp: 2500 },
+      { id: 'frontlever', rank: 'S-Rank', name: 'Quest: front lever hold', xp: 3500 },
+      { id: 'strictPistol', rank: 'S-Rank', name: 'Quest: strict pistol squat', xp: 2500 },
+      { id: 'hspu', rank: 'S-Rank', name: 'Quest: handstand push-up', xp: 3000 },
+      { id: 'monarch', rank: 'S-Rank', name: 'Quest: become Shadow Monarch', xp: 4000 }
+    ];
+
+    let state = JSON.parse(localStorage.getItem('calisthenicsRpgStandalone') || '{}');
+    state.xp ??= 0;
+    state.streak ??= 0;
+    state.completed ??= [];
+    state.completedSets ??= [];
+    state.completedSkills ??= [];
+    state.lastWorkoutDate ??= '';
+    state.lastDailyReset ??= today();
+    state.customImage ??= '';
+    state.customImageFile ??= '';
+    state.dungeonsCleared ??= 0;
+    state.ownedBeasts ??= [];
+    state.activeBeasts ??= [];
+    state.alphaBeasts ??= [];
+    state.shards ??= 0;
+
+    // migrate an older save's chibi collection onto the beast roster
+    if (Array.isArray(state.ownedChibis) && state.ownedChibis.length && !state.ownedBeasts.length) {
+      state.ownedBeasts = state.ownedChibis.map(id => beastMigration[id]).filter(Boolean);
+      state.activeBeasts = (state.activeChibis || []).map(id => beastMigration[id]).filter(Boolean).slice(0, 3);
+    }
+    delete state.ownedChibis;
+    delete state.activeChibis;
+    delete state.chibiImages;
+    state.chestsOpened ??= 0;
+    state.trainingDays ??= [];
+    state.completedBosses ??= [];
+    state.clearedPromotionBosses ??= [];
+    state.weekStreak ??= 0;
+    state.lastBankedWeek ??= '';
+    state.weeklyTarget ??= 3;
+    state.restShort ??= 20;
+    state.restLong ??= 40;
+    state.autoAdvance ??= true;
+    state.feedback ??= true;
+    state.bestWeekStreak ??= 0;
+    state.lastBackup ??= '';
+    state.bossMonth ??= '';
+    state.setXp ??= {};
+    state.stats ??= {
+      strength: 1,
+      endurance: 1,
+      discipline: 1,
+      mobility: 1,
+      core: 1,
+      shadowPower: 1
+    };
+
+    // Repair oudere saves waar stats nog niet compleet waren
+    state.stats.strength ??= 1;
+    state.stats.endurance ??= 1;
+    state.stats.discipline ??= 1;
+    state.stats.mobility ??= 1;
+    state.stats.core ??= 1;
+    state.stats.shadowPower ??= 1;
+
+    function save() {
+      try {
+        localStorage.setItem('calisthenicsRpgStandalone', JSON.stringify(state));
+      } catch (error) {
+        toast('Opslag vol! Exporteer je backup in Settings.');
+      }
+    }
+
+    const openSections = new Set();
+    let calendarOffset = 0;
+
+    function rememberSection(el) {
+      if (el.open) openSections.add(el.dataset.key);
+      else openSections.delete(el.dataset.key);
+    }
+
+    function buzz(pattern) {
+      if (state.feedback && navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    let audioCtx = null;
+    function beep(freq = 880, duration = 0.16, volume = 0.22) {
+      if (!state.feedback) return;
+      try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(volume, audioCtx.currentTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration + 0.02);
+      } catch (error) { /* audio niet beschikbaar */ }
+    }
+
+    // ---- Weekly rhythm (maandag-gebaseerd) ----
+    function weekKeyOf(date) {
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      const dayIndex = (local.getUTCDay() + 6) % 7;
+      local.setUTCDate(local.getUTCDate() - dayIndex);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function currentWeekKey() {
+      return weekKeyOf(new Date());
+    }
+
+    function previousWeekKey(key) {
+      const d = new Date(key + 'T12:00:00');
+      d.setDate(d.getDate() - 7);
+      return weekKeyOf(d);
+    }
+
+    function trainingDaysInWeek(key) {
+      return state.trainingDays.filter(dayKey => weekKeyOf(new Date(dayKey + 'T12:00:00')) === key).length;
+    }
+
+    function refreshWeekStreak() {
+      const wk = currentWeekKey();
+      if (!state.lastBankedWeek) return;
+      if (state.lastBankedWeek !== wk && state.lastBankedWeek !== previousWeekKey(wk)) {
+        if (state.weekStreak !== 0) {
+          state.weekStreak = 0;
+          save();
+        }
+      }
+    }
+
+    function currentMonthKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${d.getMonth() + 1}`;
+    }
+
+    function resetMonthlyBossesIfNeeded() {
+      if (state.bossMonth !== currentMonthKey()) {
+        state.bossMonth = currentMonthKey();
+        state.completedBosses = [];
+        save();
+      }
+    }
+
+    function dateKey(date) {
+      const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return localDate.toISOString().slice(0,10);
+    }
+
+    function today() {
+      return dateKey(new Date());
+    }
+    function yesterday() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      return localDate.toISOString().slice(0,10);
+    }
+
+    function countTrainingDaysLast7() {
+      const days = new Set(state.trainingDays || []);
+      let count = 0;
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+        const key = localDate.toISOString().slice(0,10);
+        if (days.has(key)) count++;
+      }
+
+      return count;
+    }
+
+    function isYesterday(dateString) {
+      if (!dateString) return false;
+      return dateString === yesterday();
+    }
+    function currentLevel() {
+      return Math.floor(state.xp / LEVEL_XP) + 1;
+    }
+
+    function currentRank() {
+      let unlockedRankIndex = 0;
+
+      promotionBosses.forEach((boss) => {
+        if (state.clearedPromotionBosses.includes(boss.id)) {
+          const targetIndex = rewards.findIndex(r => r.title === boss.toRank);
+          if (targetIndex > unlockedRankIndex) unlockedRankIndex = targetIndex;
+        }
+      });
+
+      return rewards[unlockedRankIndex] || rewards[0];
+    }
+
+    function nextRank() {
+      const rank = currentRank();
+      const currentIndex = rewards.findIndex(r => r.title === rank.title);
+      return rewards[currentIndex + 1] || null;
+    }
+
+    function eligiblePromotionBoss() {
+      const rank = currentRank();
+      return promotionBosses.find(boss =>
+        boss.fromRank === rank.title &&
+        currentLevel() >= boss.requiredLevel &&
+        !state.clearedPromotionBosses.includes(boss.id)
+      ) || null;
+    }
+
+    function showInfoModal(title, body) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').textContent = body;
+      document.getElementById('infoModal').classList.add('show');
+    }
+
+    function hideInfoModal() {
+      document.getElementById('infoModal').classList.remove('show');
+    }
+
+    function closeInfoModal(event) {
+      if (event.target.id === 'infoModal') hideInfoModal();
+    }
+
+    function cleanInfoText(text) {
+      return text.replace(/•/g, '-').trim();
+    }
+
+    function rankTier() {
+      return currentRank().title.split(':')[0].trim();
+    }
+
+    function availableBeasts(tier) {
+      const cap = gradeOrder.indexOf(tier.charAt(0));
+      return beastPool.filter(b => gradeOrder.indexOf(b.grade) <= cap);
+    }
+
+    // Rolls a chest. Never awards XP - cosmetics only.
+    function rollChest(tier) {
+      const table = chestTable[tier] || chestTable['E-Rank'];
+      const roll = Math.random() * 100;
+
+      if (roll < table.empty) return { type: 'shard' };
+
+      let cursor = table.empty;
+      for (const grade of gradeOrder) {
+        const weight = table.weights[grade];
+        if (!weight) continue;
+        cursor += weight;
+        if (roll < cursor) {
+          const options = beastPool.filter(b => b.grade === grade);
+          const beast = options[Math.floor(Math.random() * options.length)];
+          if (state.ownedBeasts.includes(beast.id)) return { type: 'duplicate', beast };
+          return { type: 'beast', beast };
+        }
+      }
+      return { type: 'shard' };
+    }
+
+    function grantBeast(beast) {
+      if (!state.ownedBeasts.includes(beast.id)) state.ownedBeasts.push(beast.id);
+      if (!state.activeBeasts.includes(beast.id)) {
+        state.activeBeasts.unshift(beast.id);
+        state.activeBeasts = state.activeBeasts.slice(0, 3);
+      }
+    }
+
+    // Shards come from empty chests and duplicates. At the threshold they buy a
+    // guaranteed new beast, or - once your tier is complete - an Alpha upgrade.
+    function addShard() {
+      state.shards += 1;
+      if (state.shards < SHARDS_FOR_GUARANTEE) return null;
+
+      const tier = rankTier();
+      const pool = availableBeasts(tier);
+      const missing = pool.filter(b => !state.ownedBeasts.includes(b.id));
+
+      if (missing.length) {
+        state.shards = 0;
+        const beast = missing[Math.floor(Math.random() * missing.length)];
+        grantBeast(beast);
+        return { type: 'guaranteed', beast };
+      }
+
+      const upgradable = pool.filter(b => !state.alphaBeasts.includes(b.id));
+      if (upgradable.length) {
+        state.shards = 0;
+        const beast = upgradable[Math.floor(Math.random() * upgradable.length)];
+        state.alphaBeasts.push(beast.id);
+        return { type: 'alpha', beast };
+      }
+
+      state.shards = SHARDS_FOR_GUARANTEE;
+      return null;
+    }
+
+    function resolveChest(tier) {
+      const result = rollChest(tier);
+      if (result.type === 'beast') {
+        grantBeast(result.beast);
+        return result;
+      }
+      const upgraded = addShard();
+      if (upgraded) return { ...upgraded, from: result.type };
+      return { type: result.type === 'duplicate' ? 'duplicate' : 'shard', beast: result.beast };
+    }
+
+    // ---- chest presentation ----
+    let chestQueue = null;
+    let chestBusy = false;
+
+    function beastSprite(id, scale) {
+      return pxTag(id, scale || 3);
+    }
+
+    function presentChest(result, source) {
+      chestQueue = { result, source };
+      chestBusy = false;
+
+      const stage = document.getElementById('chestStage');
+      stage.classList.remove('revealed');
+      document.getElementById('chestArt').innerHTML = pxTag('chest_closed', 4, 'chest-svg', '');
+      document.getElementById('chestPrize').className = 'chest-prize';
+      document.getElementById('chestPrize').innerHTML = '';
+      document.getElementById('chestBurst').className = 'chest-burst';
+      document.getElementById('chestGrade').textContent = '';
+      document.getElementById('chestName').textContent = source;
+      document.getElementById('chestSub').textContent = 'Tik om te openen.';
+
+      const btn = document.getElementById('chestBtn');
+      btn.textContent = 'Openen';
+      btn.disabled = false;
+
+      const color = result.beast ? gradeColor[result.beast.grade] : '#a1a1aa';
+      document.documentElement.style.setProperty('--drop-color', color);
+
+      document.getElementById('chestModal').classList.add('show');
+    }
+
+    function chestAction() {
+      if (!chestQueue) {
+        document.getElementById('chestModal').classList.remove('show');
+        return;
+      }
+      if (chestQueue.opened) {
+        document.getElementById('chestModal').classList.remove('show');
+        chestQueue = null;
+        render();
+        return;
+      }
+      if (chestBusy) return;
+      openChestSequence();
+    }
+
+    function openChestSequence() {
+      chestBusy = true;
+      const { result } = chestQueue;
+      const chest = document.querySelector('#chestArt canvas');
+      const stage = document.getElementById('chestStage');
+      const btn = document.getElementById('chestBtn');
+
+      btn.disabled = true;
+      btn.textContent = '\u2026';
+      document.getElementById('chestSub').textContent = '';
+      document.getElementById('chestName').textContent = '';
+
+      const isBeast = result.type === 'beast' || result.type === 'guaranteed';
+      const grade = result.beast ? result.beast.grade : 'E';
+      const color = result.beast ? gradeColor[grade] : '#a1a1aa';
+      const intensity = isBeast ? Math.min(3, 1 + gradeOrder.indexOf(grade) / 2 | 0) : 1;
+      const shakes = result.type === 'alpha' ? 3 : intensity;
+      const bigReveal = isBeast && gradeOrder.indexOf(grade) >= 3;
+
+      document.documentElement.style.setProperty('--drop-color', color);
+
+      let n = 0;
+      const doShake = () => {
+        chest.classList.remove('shake');
+        void chest.offsetWidth;
+        chest.classList.add('shake');
+        beep(300 + n * 120, 0.08, 0.14);
+        buzz(30 + n * 15);
+        n++;
+        if (n < shakes) setTimeout(doShake, 560);
+        else setTimeout(popChest, 620);
+      };
+
+      const popChest = () => {
+        chest.dataset.sprite = 'chest_open';
+        const burst = document.getElementById('chestBurst');
+        burst.className = 'chest-burst go';
+        if (bigReveal || result.type === 'alpha') stage.classList.add('revealed');
+        beep(isBeast ? 1080 : 520, 0.32);
+        buzz(isBeast ? [60, 50, 60, 50, 120] : 40);
+
+        setTimeout(() => {
+          const prize = document.getElementById('chestPrize');
+          const gradeEl = document.getElementById('chestGrade');
+          const nameEl = document.getElementById('chestName');
+          const subEl = document.getElementById('chestSub');
+
+          if (result.type === 'beast' || result.type === 'guaranteed') {
+            prize.innerHTML = pxTag(result.beast.id, 4);
+            gradeEl.textContent = `${result.beast.grade}-GRADE`;
+            nameEl.textContent = result.beast.name;
+            subEl.textContent = result.type === 'guaranteed'
+              ? `${result.beast.type} \u2014 scherven ingewisseld voor een gegarandeerde drop`
+              : `${result.beast.type} voegt zich bij je leger`;
+          } else if (result.type === 'alpha') {
+            prize.innerHTML = pxTag(result.beast.id, 4);
+            gradeEl.textContent = 'ALPHA';
+            nameEl.textContent = `Alpha ${result.beast.name}`;
+            subEl.textContent = 'Je tier is compleet \u2014 scherven upgraden een beest naar Alpha.';
+          } else if (result.type === 'duplicate') {
+            prize.innerHTML = pxTag(result.beast.id, 4);
+            gradeEl.textContent = 'DUPLICAAT';
+            nameEl.textContent = result.beast.name;
+            subEl.textContent = `Al in je leger \u2014 omgezet in 1 scherf (${state.shards}/${SHARDS_FOR_GUARANTEE}).`;
+          } else {
+            prize.innerHTML = pxTag('shard', 4);
+            gradeEl.textContent = 'SCHERF';
+            nameEl.textContent = 'Leeg';
+            subEl.textContent = `+1 scherf (${state.shards}/${SHARDS_FOR_GUARANTEE}). Bij ${SHARDS_FOR_GUARANTEE} krijg je gegarandeerd een beest.`;
+          }
+
+          gradeEl.style.color = color;
+          nameEl.style.color = (result.type === 'duplicate' || result.type === 'shard') ? '#a1a1aa' : color;
+          prize.className = 'chest-prize go';
+          chest.style.opacity = '.18';
+
+          const btn2 = document.getElementById('chestBtn');
+          btn2.disabled = false;
+          btn2.textContent = (result.type === 'shard' || result.type === 'duplicate') ? 'Verder' : 'Claim';
+          chestQueue.opened = true;
+          chestBusy = false;
+          save();
+        }, 330);
+      };
+
+      setTimeout(doShake, 160);
+    }
+
+    function roundedStat(value) {
+      return Math.max(1, value).toFixed(2);
+    }
+
+    function increaseStats(type, payload = {}) {
+      if (type === 'daily') {
+        state.stats.strength += 0.4;
+        state.stats.endurance += 0.4;
+        state.stats.discipline += 0.5;
+        state.stats.mobility += 0.2;
+        state.stats.core += 0.3;
+        state.stats.shadowPower += 0.2;
+      }
+
+      if (type === 'dungeon') {
+        state.stats.discipline += 0.08;
+        state.stats.shadowPower += 0.05;
+
+        if (payload.category === 'Upper Body') state.stats.strength += 0.5;
+        if (payload.category === 'Lower Body') {
+          state.stats.strength += 0.3;
+          state.stats.endurance += 0.4;
+          state.stats.mobility += 0.35;
+        }
+        if (payload.category === 'Core') state.stats.core += 0.6;
+      }
+
+      if (type === 'boss') {
+        state.stats.strength += 1.5;
+        state.stats.endurance += 1.5;
+        state.stats.discipline += 1.2;
+        state.stats.mobility += 0.8;
+        state.stats.core += 1.2;
+        state.stats.shadowPower += 1;
+      }
+
+      if (type === 'quest') {
+        state.stats.discipline += 0.3;
+        state.stats.shadowPower += 0.2;
+      }
+    }
+
+    function toast(text) {
+      const el = document.getElementById('toast');
+      el.textContent = text;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 1200);
+    }
+
+    // ---- Set / rest timer ----
+    let timer = null;
+    let timerTick = null;
+
+    function parseSegments(text) {
+      const matches = String(text).match(/(\d+)\s*(sec|s\b)/gi);
+      if (matches && matches.length) return matches.map(m => parseInt(m, 10));
+      const fallback = String(text).match(/(\d+)/);
+      return fallback ? [parseInt(fallback[1], 10)] : [40];
+    }
+
+    function parseDuration(text) {
+      return parseSegments(text).reduce((sum, n) => sum + n, 0);
+    }
+
+    // Circuit: ronde 1 = set 1 van alle oefeningen, dan ronde 2, dan ronde 3.
+    function circuitSteps() {
+      const rank = currentRank();
+      const exercises = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
+      const maxRounds = Math.max(...exercises.map(e => e.sets));
+      const steps = [];
+      for (let round = 1; round <= maxRounds; round++) {
+        exercises.forEach(exercise => {
+          if (round <= exercise.sets) {
+            steps.push({ exercise, exerciseId: exercise.id, setNumber: round, key: `${exercise.id}-${round}` });
+          }
+        });
+      }
+      return steps;
+    }
+
+    function stepIndexOf(exerciseId, setNumber) {
+      return circuitSteps().findIndex(st => st.exerciseId === exerciseId && st.setNumber === setNumber);
+    }
+
+    function nextOpenStepIndex(fromIndex) {
+      const steps = circuitSteps();
+      for (let i = fromIndex + 1; i < steps.length; i++) {
+        if (!state.completedSets.includes(steps[i].key)) return i;
+      }
+      return -1;
+    }
+
+    // Rust: 20s tussen oefeningen, 40s bij de overgang naar een nieuwe ronde.
+    function restBetween(currentIndex, nextIndex) {
+      const steps = circuitSteps();
+      if (nextIndex < 0 || !steps[currentIndex] || !steps[nextIndex]) return 0;
+      return steps[nextIndex].setNumber !== steps[currentIndex].setNumber ? state.restLong : state.restShort;
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      return `${m}:${String(sec).padStart(2, '0')}`;
+    }
+
+    function renderTimer() {
+      const bar = document.getElementById('timerBar');
+      if (!timer) {
+        bar.classList.remove('show');
+        return;
+      }
+      bar.classList.add('show');
+      bar.classList.toggle('rest', timer.mode === 'rest');
+      document.getElementById('timerLabel').textContent = timer.mode === 'rest'
+        ? (timer.newRound ? 'Rust \u2022 nieuwe ronde' : 'Rust')
+        : (timer.sideLabel || 'Werk');
+      document.getElementById('timerValue').textContent = formatTime(timer.remaining);
+      document.getElementById('timerContext').textContent = timer.context || '';
+      document.getElementById('timerFill').style.width = `${(timer.remaining / timer.total) * 100}%`;
+      document.getElementById('timerPause').textContent = timer.paused ? 'Hervat' : 'Pauze';
+    }
+
+    function runTimer() {
+      clearInterval(timerTick);
+      timerTick = setInterval(() => {
+        if (!timer || timer.paused) return;
+        timer.remaining -= 1;
+
+        if (timer.mode === 'work' && timer.switchAt && timer.remaining === timer.switchAt) {
+          timer.sideLabel = 'Werk \u2022 kant 2';
+          beep(1040, 0.12);
+          setTimeout(() => beep(1040, 0.12), 160);
+          buzz([50, 70, 50]);
+          toast('Wissel van kant');
+        }
+
+        if (timer.remaining <= 3 && timer.remaining > 0) beep(660, 0.07, 0.16);
+
+        if (timer.remaining <= 0) {
+          const finished = timer;
+          if (finished.mode === 'work') {
+            beep(980, 0.3);
+            buzz([40, 60, 40]);
+            completeSet(finished.exerciseId, finished.setNumber, true);
+            const nextIndex = nextOpenStepIndex(finished.stepIndex);
+            startRest(finished.stepIndex, nextIndex);
+          } else {
+            beep(760, 0.35);
+            buzz(70);
+            if (state.autoAdvance && finished.nextIndex >= 0) {
+              startStep(finished.nextIndex);
+            } else {
+              stopTimer(true);
+              toast(finished.nextIndex >= 0 ? 'Rust voorbij \u2014 volgende oefening' : 'Alle sets klaar!');
+            }
+          }
+          return;
+        }
+        renderTimer();
+      }, 1000);
+    }
+
+    function startStep(stepIndex) {
+      const steps = circuitSteps();
+      const step = steps[stepIndex];
+      if (!step) {
+        stopTimer(true);
+        return;
+      }
+
+      const segments = parseSegments(step.exercise.target);
+      const total = segments.reduce((sum, n) => sum + n, 0);
+      const maxRounds = Math.max(...(rankWorkouts[currentRank().title] || rankWorkouts['E-Rank: Hunter']).map(e => e.sets));
+
+      timer = {
+        mode: 'work',
+        total,
+        remaining: total,
+        paused: false,
+        exerciseId: step.exerciseId,
+        setNumber: step.setNumber,
+        stepIndex,
+        switchAt: segments.length > 1 ? total - segments[0] : 0,
+        sideLabel: segments.length > 1 ? 'Werk \u2022 kant 1' : 'Werk',
+        context: `${step.exercise.name} \u2022 ronde ${step.setNumber}/${maxRounds}`
+      };
+
+      beep(520, 0.12);
+      buzz(25);
+      render();
+      runTimer();
+    }
+
+    function startSetTimer(exerciseId, setNumber) {
+      const index = stepIndexOf(exerciseId, setNumber);
+      if (index >= 0) startStep(index);
+    }
+
+    function startCircuit() {
+      const index = nextOpenStepIndex(-1);
+      if (index < 0) {
+        toast('Alle sets zijn al klaar');
+        return;
+      }
+      startStep(index);
+    }
+
+    function startRest(currentIndex, nextIndex) {
+      const seconds = restBetween(currentIndex, nextIndex);
+      const steps = circuitSteps();
+
+      if (!seconds || nextIndex < 0) {
+        stopTimer(true);
+        toast(nextIndex < 0 ? 'Alle sets klaar!' : 'Volgende oefening');
+        return;
+      }
+
+      const nextStep = steps[nextIndex];
+      const newRound = nextStep.setNumber !== steps[currentIndex].setNumber;
+
+      timer = {
+        mode: 'rest',
+        total: seconds,
+        remaining: seconds,
+        paused: false,
+        nextIndex,
+        newRound,
+        context: `Volgende: ${nextStep.exercise.name} \u2022 ronde ${nextStep.setNumber}`
+      };
+
+      render();
+      runTimer();
+    }
+
+    function toggleTimerPause() {
+      if (!timer) return;
+      timer.paused = !timer.paused;
+      renderTimer();
+    }
+
+    function timerFinishNow() {
+      if (!timer) return;
+      if (timer.mode === 'work') {
+        const finished = timer;
+        completeSet(finished.exerciseId, finished.setNumber, true);
+        beep(980, 0.25);
+        buzz([40, 60, 40]);
+        startRest(finished.stepIndex, nextOpenStepIndex(finished.stepIndex));
+      } else {
+        const nextIndex = timer.nextIndex;
+        if (nextIndex >= 0) startStep(nextIndex);
+        else stopTimer(true);
+      }
+    }
+
+    function stopTimer(silent) {
+      clearInterval(timerTick);
+      timerTick = null;
+      timer = null;
+      render();
+    }
+
+    function activeSetKey() {
+      return timer && timer.mode === 'work' ? `${timer.exerciseId}-${timer.setNumber}` : null;
+    }
+
+    function nextStepKey() {
+      if (!timer || timer.mode !== 'rest' || timer.nextIndex < 0) return null;
+      const step = circuitSteps()[timer.nextIndex];
+      return step ? step.key : null;
+    }
+
+    // ---- Reward drop popup ----
+    // ---- Backup ----
+    function exportSave() {
+      const payload = JSON.stringify(state, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `shadow-hunter-backup-${today()}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      state.lastBackup = today();
+      save();
+      render();
+      toast('Backup gedownload');
+    }
+
+    function importSave(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (typeof imported !== 'object' || imported === null || typeof imported.xp !== 'number') {
+            toast('Ongeldig backupbestand');
+            return;
+          }
+          if (!confirm('Huidige voortgang overschrijven met deze backup?')) return;
+          localStorage.setItem('calisthenicsRpgStandalone', JSON.stringify(imported));
+          location.reload();
+        } catch (error) {
+          toast('Kon backup niet lezen');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function setRestShort(seconds) {
+      state.restShort = seconds;
+      save();
+      render();
+      toast(`Rust tussen oefeningen: ${seconds}s`);
+    }
+
+    function setRestLong(seconds) {
+      state.restLong = seconds;
+      save();
+      render();
+      toast(`Rust tussen rondes: ${seconds}s`);
+    }
+
+    function toggleAutoAdvance() {
+      state.autoAdvance = !state.autoAdvance;
+      save();
+      render();
+      toast(state.autoAdvance ? 'Auto doorgaan aan' : 'Auto doorgaan uit');
+    }
+
+    function setWeeklyTarget(days) {
+      state.weeklyTarget = days;
+      save();
+      render();
+      toast(`Weekdoel: ${days}x per week`);
+    }
+
+    function toggleFeedback() {
+      state.feedback = !state.feedback;
+      save();
+      render();
+      toast(state.feedback ? 'Geluid + trilling aan' : 'Geluid + trilling uit');
+    }
+
+    function changeCalendarMonth(delta) {
+      calendarOffset += delta;
+      render();
+    }
+
+    // ---- Next milestone ----
+    function nextUnlock(level) {
+      const candidates = [];
+      const soldier = shadowSoldiers.find(sd => sd.level > level);
+      if (soldier) candidates.push({ level: soldier.level, label: soldier.name });
+      const aura = auraStages.find(a => a.level > level);
+      if (aura) candidates.push({ level: aura.level, label: `\u2728 ${aura.aura}` });
+      const rank = currentRank();
+      const trial = promotionBosses.find(b => b.fromRank === rank.title && !state.clearedPromotionBosses.includes(b.id));
+      if (trial && trial.requiredLevel > level) candidates.push({ level: trial.requiredLevel, label: `\U0001f451 ${trial.name}` });
+      if (!candidates.length) return null;
+      candidates.sort((a, b) => a.level - b.level);
+      return candidates[0];
+    }
+
+    function sessionXpEstimate() {
+      const rank = currentRank();
+      const exercises = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
+      return exercises.reduce((sum, e) => sum + e.xp * e.sets, 0) + 100;
+    }
+
+    function applyAura(rankTitle) {
+      const auraSettings = {
+        'E-Rank: Hunter': {
+          main: 'rgba(59,130,246,.20)',
+          secondary: 'rgba(34,211,238,.08)',
+          particle: 'rgba(147,197,253,.65)',
+          glow: 'rgba(147,197,253,.85)',
+          blur: '18px',
+          speed: '5s',
+          particles: 16
+        },
+        'D-Rank: Fighter': {
+          main: 'rgba(99,102,241,.25)',
+          secondary: 'rgba(34,211,238,.10)',
+          particle: 'rgba(129,140,248,.70)',
+          glow: 'rgba(129,140,248,.90)',
+          blur: '20px',
+          speed: '4.5s',
+          particles: 22
+        },
+        'C-Rank: Assassin': {
+          main: 'rgba(124,58,237,.32)',
+          secondary: 'rgba(14,165,233,.12)',
+          particle: 'rgba(167,139,250,.75)',
+          glow: 'rgba(167,139,250,.95)',
+          blur: '22px',
+          speed: '4s',
+          particles: 28
+        },
+        'B-Rank: Slayer': {
+          main: 'rgba(109,40,217,.42)',
+          secondary: 'rgba(6,182,212,.16)',
+          particle: 'rgba(196,181,253,.82)',
+          glow: 'rgba(196,181,253,1)',
+          blur: '25px',
+          speed: '3.6s',
+          particles: 34
+        },
+        'A-Rank: Monarch': {
+          main: 'rgba(88,28,135,.52)',
+          secondary: 'rgba(34,211,238,.20)',
+          particle: 'rgba(216,180,254,.9)',
+          glow: 'rgba(216,180,254,1)',
+          blur: '28px',
+          speed: '3.2s',
+          particles: 42
+        },
+        'S-Rank: Shadow Monarch': {
+          main: 'rgba(67,56,202,.65)',
+          secondary: 'rgba(34,211,238,.28)',
+          particle: 'rgba(103,232,249,.95)',
+          glow: 'rgba(103,232,249,1)',
+          blur: '32px',
+          speed: '2.8s',
+          particles: 52
+        },
+        'Shadow Commander': {
+          main: 'rgba(76,29,149,.72)',
+          secondary: 'rgba(8,47,73,.35)',
+          particle: 'rgba(192,132,252,.95)',
+          glow: 'rgba(192,132,252,1)',
+          blur: '36px',
+          speed: '2.5s',
+          particles: 62
+        },
+        'Shadow Monarch': {
+          main: 'rgba(30,27,75,.88)',
+          secondary: 'rgba(103,232,249,.38)',
+          particle: 'rgba(255,255,255,.95)',
+          glow: 'rgba(167,139,250,1)',
+          blur: '42px',
+          speed: '2.2s',
+          particles: 76
+        }
+      };
+
+      const aura = auraSettings[rankTitle] || auraSettings['E-Rank: Hunter'];
+      document.documentElement.style.setProperty('--aura-main', aura.main);
+      document.documentElement.style.setProperty('--aura-secondary', aura.secondary);      document.documentElement.style.setProperty('--aura-blur', aura.blur);
+      document.documentElement.style.setProperty('--aura-speed', aura.speed);    }
+
+    function resetDailyWorkoutIfNeeded() {
+      if (state.lastDailyReset !== today()) {
+        state.completed = [];
+        state.completedSets = [];
+        state.setXp = {};
+        state.lastDailyReset = today();
+        save();
+      }
+    }
+
+    function render() {
+      resetDailyWorkoutIfNeeded();
+      refreshWeekStreak();
+      resetMonthlyBossesIfNeeded();
+      const scrollBefore = window.scrollY;
+      const level = currentLevel();
+      const rank = currentRank();
+      const next = nextRank();
+      applyAura(rank.title);
+      const xpIntoLevel = state.xp % LEVEL_XP;
+      const progress = Math.round((xpIntoLevel / LEVEL_XP) * 100);
+      const rankProgress = next ? Math.round(((state.xp - rank.xp) / (next.xp - rank.xp)) * 100) : 100;
+      const currentExercises = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
+      const todayXp = currentExercises.reduce((sum, e) => {
+        const completedSets = Array.from({ length: e.sets }, (_, i) => `${e.id}-${i + 1}`)
+          .filter(key => state.completedSets.includes(key)).length;
+        return sum + (completedSets * e.xp);
+      }, 0);
+
+      document.getElementById('levelTitle').textContent = `Level ${level}`;
+      document.getElementById('rankTitle').textContent = rank.title;
+      document.getElementById('xpFill').style.width = `${rankProgress}%`;
+      document.getElementById('xpText').textContent = next
+        ? `${state.xp - rank.xp} / ${next.xp - rank.xp} XP tot ${next.title}`
+        : `${state.xp} XP • Max rank bereikt`;
+      document.getElementById('xpStat').textContent = state.xp;
+      document.getElementById('streakStat').textContent = state.weekStreak;
+      document.getElementById('todayStat').textContent = todayXp;
+
+      const upcoming = nextUnlock(level);
+      const perSession = sessionXpEstimate();
+      document.getElementById('nextUnlockText').textContent = upcoming
+        ? `Next: ${upcoming.label} \u2022 Lv ${upcoming.level} \u2022 ~${Math.max(1, Math.ceil(((upcoming.level - 1) * LEVEL_XP - state.xp) / perSession))} workouts`
+        : 'Alles ontgrendeld \u2014 blijf jagen.';
+
+      const weekKey = currentWeekKey();
+      const daysThisWeek = trainingDaysInWeek(weekKey);
+      const target = state.weeklyTarget;
+      const ringPct = Math.min(1, daysThisWeek / target);
+      const circumference = 2 * Math.PI * 32;
+      document.getElementById('weekRing').innerHTML = `
+        <svg width="76" height="76" viewBox="0 0 76 76">
+          <circle cx="38" cy="38" r="32" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="8"></circle>
+          <circle cx="38" cy="38" r="32" fill="none" stroke="${daysThisWeek >= target ? '#22c55e' : '#22d3ee'}" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="${circumference}" stroke-dashoffset="${circumference * (1 - ringPct)}"></circle>
+        </svg>
+        <div class="ring-label">${daysThisWeek}/${target}</div>`;
+      document.getElementById('weekTitle').textContent = daysThisWeek >= target ? 'Week voltooid \u2705' : 'Deze week';
+      document.getElementById('weekSub').textContent = daysThisWeek >= target
+        ? `Week streak: ${state.weekStreak} \u2022 record ${state.bestWeekStreak}`
+        : `Nog ${target - daysThisWeek} training(en) om je week te banken \u2022 streak ${state.weekStreak}`;
+
+      const hero = document.getElementById('heroArt');
+      const activeImage = state.customImageFile || state.customImage;
+      if (activeImage) hero.style.backgroundImage = `linear-gradient(160deg, rgba(79,70,229,.38), rgba(2,6,23,.75)), url('${activeImage}')`;
+      else hero.style.backgroundImage = '';
+
+      const steps = circuitSteps();
+      const maxRounds = Math.max(...currentExercises.map(e => e.sets));
+      const activeKey = activeSetKey();
+      const upNextKey = nextStepKey();
+
+      document.getElementById('exerciseList').innerHTML = Array.from({ length: maxRounds }, (_, r) => {
+        const round = r + 1;
+        const roundSteps = steps.filter(st => st.setNumber === round);
+        const roundDone = roundSteps.every(st => state.completedSets.includes(st.key));
+        const doneCount = roundSteps.filter(st => state.completedSets.includes(st.key)).length;
+
+        const rows = roundSteps.map(st => {
+          const setDone = state.completedSets.includes(st.key);
+          const isActive = activeKey === st.key;
+          const isNext = upNextKey === st.key;
+          const segments = parseSegments(st.exercise.target);
+          const duration = segments.reduce((sum, n) => sum + n, 0);
+          const sideNote = segments.length > 1 ? ` \u2022 ${segments.join('s + ')}s per kant` : '';
+          const action = setDone ? `undoSet(${st.exerciseId}, ${st.setNumber})` : `startSetTimer(${st.exerciseId}, ${st.setNumber})`;
+
+          return `<div class="circuit-row ${setDone ? 'done' : ''} ${isActive ? 'active' : ''} ${isNext ? 'up-next' : ''}">
+            <div style="min-width:0;">
+              <div class="exercise-title info-line" onclick="showInfoModal('${st.exercise.name.replace(/'/g, "\'")}', cleanInfoText('${st.exercise.target.replace(/'/g, "\'")}'))">${st.exercise.name}</div>
+              <div class="exercise-meta">${duration}s${sideNote} \u2022 +${st.exercise.xp} XP</div>
+            </div>
+            <button class="ghost set-btn ${setDone ? 'done' : ''} ${isActive ? 'active' : ''}" onclick="${action}">
+              ${setDone ? '\u2713' : isActive ? '\u23f1' : '\u25b6'}
+            </button>
+          </div>`;
+        }).join('');
+
+        return `<div class="round-block ${roundDone ? 'done' : ''}">
+          <div class="round-header">
+            <span>Ronde ${round}</span>
+            <span class="small">${doneCount}/${roundSteps.length}${roundDone ? ' \u2713' : ''}</span>
+          </div>
+          ${rows}
+        </div>`;
+      }).join('');
+
+      const circuitBtn = document.getElementById('circuitBtn');
+      const allSetsDone = state.completedSets.length >= steps.length;
+      circuitBtn.disabled = allSetsDone;
+      circuitBtn.textContent = timer
+        ? 'Circuit loopt\u2026'
+        : allSetsDone
+          ? 'Alle sets klaar'
+          : state.completedSets.length
+            ? 'Circuit hervatten'
+            : 'Circuit starten';
+
+      const totalSets = steps.length;
+      const allDone = state.completedSets.length === totalSets;
+      const finishBtn = document.getElementById('finishBtn');
+      finishBtn.disabled = !allDone || state.lastWorkoutDate === today();
+      finishBtn.textContent = state.lastWorkoutDate === today() ? 'Workout vandaag voltooid' : 'Workout afronden +100 XP';
+
+      const currentAura = [...auraStages].reverse().find(a => level >= a.level);
+
+      document.getElementById('systemMessage').textContent = [
+        `System Notice: Aura detected • ${currentAura.aura}`,
+        `Daily Quest available for ${rank.title}`,
+        `The System recognizes your growth.`,
+        `Hunter status updated.`
+      ][level % 4];
+
+      const unlockedSoldiers = shadowSoldiers.filter(s => level >= s.level);
+      const activeCompanion = unlockedSoldiers[unlockedSoldiers.length - 1];
+
+      document.getElementById('heroCommander').innerHTML = activeCompanion ? pxTag(activeCompanion.key, 2) : '';
+      document.getElementById('commanderName').textContent = activeCompanion ? `${activeCompanion.name} • commanding` : '';
+
+      const activeBeastObjects = state.activeBeasts.map(id => beastPool.find(b => b.id === id)).filter(Boolean);
+      document.getElementById('floatingChibis').innerHTML = activeBeastObjects.map(b => `
+        <div class="floating-chibi" title="${b.name}">
+          <div class="sprite">${pxTag(b.id, 1)}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('activeCompanion').innerHTML = activeCompanion ? `
+        <div class="active-companion">
+          <div class="active-companion-emoji" style="width:64px; height:64px;">${pxTag(activeCompanion.key, 2)}</div>
+          <div class="active-companion-info">
+            <div style="font-weight:900; font-size:18px;">${activeCompanion.name}</div>
+            <div class="small">Active Shadow Soldier</div>
+          </div>
+        </div>
+      ` : '';
+
+      document.getElementById('shadowSoldiers').innerHTML = shadowSoldiers.map(s => {
+        const unlocked = level >= s.level;
+        return `<div class="reward companion-card ${unlocked ? '' : 'locked'}">
+          <div class="fake-img"><div class="sprite">${pxTag(s.key, 2)}</div></div>
+          ${unlocked ? '' : '<div class="lock">🔒</div>'}
+          <div class="level-badge">Lv ${s.level}</div>
+        </div>`;
+      }).join('');
+
+      const tier = rankTier();
+      const tierCap = gradeOrder.indexOf(tier.charAt(0));
+
+      document.getElementById('shardIcons').innerHTML = Array.from({ length: SHARDS_FOR_GUARANTEE }, (_, i) =>
+        `<span class="${i < state.shards ? 'on' : ''}">${pxTag('shard', 1)}</span>`).join('');
+
+      const tierPool = availableBeasts(tier);
+      const tierComplete = tierPool.every(b => state.ownedBeasts.includes(b.id));
+      document.getElementById('shardText').textContent = tierComplete
+        ? `${state.shards}/${SHARDS_FOR_GUARANTEE} scherven → Alpha upgrade`
+        : `${state.shards}/${SHARDS_FOR_GUARANTEE} scherven → gegarandeerd beest`;
+
+      document.getElementById('beastCollection').innerHTML = beastPool.map(b => {
+        const owned = state.ownedBeasts.includes(b.id);
+        const active = state.activeBeasts.includes(b.id);
+        const alpha = state.alphaBeasts.includes(b.id);
+        const reachable = gradeOrder.indexOf(b.grade) <= tierCap;
+
+        return `<div class="reward companion-card beast-card ${owned ? '' : 'locked'} ${alpha ? 'alpha' : ''}"
+          onclick="toggleBeast('${b.id}')"
+          title="${b.name} — ${b.type}"
+          style="cursor:${owned ? 'pointer' : 'default'}; border-color:${active ? 'rgba(34,211,238,.8)' : alpha ? 'rgba(251,191,36,.55)' : 'rgba(255,255,255,.1)'};">
+          <div class="fake-img">${owned ? `<div class="sprite">${pxTag(b.id, 2)}</div>` : '<span style="font-size:22px;">?</span>'}</div>
+          ${owned ? '' : `<div class="lock">${reachable ? '🔒' : '⛓️'}</div>`}
+          ${alpha ? '<div class="alpha-mark">A</div>' : ''}
+          <div class="level-badge grade-${b.grade.toLowerCase()}">${b.grade}</div>
+        </div>`;
+      }).join('');
+
+      const stats = {
+        Strength: roundedStat(state.stats.strength),
+        Endurance: roundedStat(state.stats.endurance),
+        Discipline: roundedStat(state.stats.discipline),
+        Mobility: roundedStat(state.stats.mobility),
+        Core: roundedStat(state.stats.core),
+        Shadow: roundedStat(state.stats.shadowPower)
+      };
+
+      document.getElementById('hunterStats').innerHTML = Object.entries(stats).map(([name, value]) => {
+        return `
+          <div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>${name}</span>
+              <strong>${value}</strong>
+            </div>
+            <div class="xp-bar" style="height:10px; margin-top:0;">
+              <div class="xp-fill" style="width:${Math.min(value,100)}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('rewardGrid').innerHTML = rewards.map(r => {
+        const unlocked = level >= r.level;
+        return `<div class="reward ${unlocked ? '' : 'locked'}" title="${r.title}">
+          <div class="fake-img"><div class="sprite">${pxTag('rank_' + r.badge, 2)}</div></div>
+          ${unlocked ? '' : '<div class="lock">🔒</div>'}
+          <div class="level-badge">L${r.level}</div>
+        </div>`;
+      }).join('');
+
+      const groupedDungeons = {};
+      dungeons.forEach(d => {
+        if (!groupedDungeons[d.rank]) groupedDungeons[d.rank] = [];
+        groupedDungeons[d.rank].push(d);
+      });
+
+      const promotionBoss = eligiblePromotionBoss();
+      const nextPromotion = promotionBosses.find(boss => boss.fromRank === rank.title && !state.clearedPromotionBosses.includes(boss.id));
+
+      document.getElementById('promotionBossBox').innerHTML = promotionBoss ? `
+        <div class="skill" style="display:block;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;">
+            <div>
+              <strong>👑 ${promotionBoss.name}</strong>
+              <div class="small">${promotionBoss.fromRank} → ${promotionBoss.toRank} • Required Lv ${promotionBoss.requiredLevel} • +${promotionBoss.xp} XP</div>
+            </div>
+            <button class="ghost" onclick="completePromotionBoss('${promotionBoss.id}')">Clear Trial</button>
+          </div>
+          <div class="small" style="display:grid; gap:4px;">
+            <div class="info-line" onclick="showInfoModal('${promotionBoss.name.replace(/'/g, "\'")}', cleanInfoText('${promotionBoss.workout.join(' | ').replace(/'/g, "\'")}'))">👑 Bekijk trial phases</div>
+          </div>
+        </div>
+      ` : nextPromotion ? `
+        <div class="skill" style="display:block; opacity:.6;">
+          <strong>🔒 ${nextPromotion.name}</strong>
+          <div class="small">Unlocks at Level ${nextPromotion.requiredLevel}. Current Level: ${level}</div>
+        </div>
+      ` : `
+        <div class="skill" style="display:block;">
+          <strong>✅ All promotion trials cleared</strong>
+          <div class="small">You have reached the highest rank path.</div>
+        </div>
+      `;
+
+      document.getElementById('bossList').innerHTML = monthlyBosses.map(b => {
+        const done = state.completedBosses.includes(b.id);
+        const level = currentLevel();
+        const requiredLevel = parseInt(b.requirement.replace(/[^0-9]/g, '')) || 1;
+        const unlocked = level >= requiredLevel;
+
+        return `
+          <div class="skill" style="display:block;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;">
+              <div>
+                <strong>👑 ${b.name}</strong>
+                <div class="small">${b.rank} • ${b.duration} • Requirement: ${b.requirement} • +${b.xp} XP</div>
+              </div>
+
+              <button class="ghost" onclick="completeBoss('${b.id}')" ${done || !unlocked ? 'disabled' : ''}>
+                ${done ? 'Cleared' : unlocked ? 'Raid' : 'Locked'}
+              </button>
+            </div>
+
+            <div class="small" style="display:grid; gap:4px;">
+              <div class="info-line" onclick="showInfoModal('${b.name.replace(/'/g, "\'")}', cleanInfoText('${b.workout.join(' | ').replace(/'/g, "\'")}'))">👑 Bekijk raid phases</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('dungeonList').innerHTML = Object.entries(groupedDungeons).map(([rankName, rankDungeons]) => {
+        return `
+          <details class="card" data-key="dungeon-${rankName}" ontoggle="rememberSection(this)" style="margin-bottom:12px; padding:14px; background:#18181b;">
+            <summary style="cursor:pointer; font-weight:800; font-size:18px; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+              <span>⚔️ ${rankName} Dungeons</span>
+            </summary>
+
+            <div style="margin-top:14px; display:grid; gap:12px;">
+              ${rankDungeons.map(d => {
+                const rankOrder = ['E-Rank', 'D-Rank', 'C-Rank', 'B-Rank', 'A-Rank', 'S-Rank'];
+                const currentRankIndex = rankOrder.indexOf(rank.title.split(':')[0].trim());
+                const dungeonRankIndex = rankOrder.indexOf(d.rank);
+                const unlocked = dungeonRankIndex <= currentRankIndex + 1;
+
+                return `
+                  <div class="skill" style="display:block; opacity:${unlocked ? '1' : '.45'};">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px;">
+                      <div>
+                        <strong>${d.title}</strong>
+                        <div class="small">${d.rank} • ${d.category} • ${d.difficulty} • +${d.xp} XP</div>
+                      </div>
+
+                      <button class="ghost" onclick="completeDungeon('${d.id}')" ${unlocked ? '' : 'disabled'}>
+                        ${unlocked ? 'Clear' : 'Locked'}
+                      </button>
+                    </div>
+
+                    <div class="small" style="display:grid; gap:4px;">
+                      <div class="info-line" onclick="showInfoModal('${d.title.replace(/'/g, "\'")}', cleanInfoText('${d.workout.join(' | ').replace(/'/g, "\'")}'))">⚔️ Bekijk workout details</div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
+        `;
+      }).join('');
+
+      const completedDailySets = state.completedSets.length;
+      const totalDailySets = currentExercises.reduce((sum, e) => sum + e.sets, 0);
+      const completedQuests = state.completedSkills.length;
+      const unlockedCompanions = shadowSoldiers.filter(s => level >= s.level).length;
+
+      const nowForCalendar = new Date();
+      nowForCalendar.setDate(1);
+      nowForCalendar.setMonth(nowForCalendar.getMonth() + calendarOffset);
+      const calendarYear = nowForCalendar.getFullYear();
+      const calendarMonth = nowForCalendar.getMonth();
+      const monthName = nowForCalendar.toLocaleDateString('nl-BE', { month: 'long', year: 'numeric' });
+      const firstDayOfMonth = new Date(calendarYear, calendarMonth, 1);
+      const lastDayOfMonth = new Date(calendarYear, calendarMonth + 1, 0);
+      const startOffset = (firstDayOfMonth.getDay() + 6) % 7; // maandag = 0
+      const totalCalendarCells = Math.ceil((startOffset + lastDayOfMonth.getDate()) / 7) * 7;
+      const weekdays = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+
+      const calendarCells = Array.from({ length: totalCalendarCells }, (_, i) => {
+        const dayNumber = i - startOffset + 1;
+
+        if (dayNumber < 1 || dayNumber > lastDayOfMonth.getDate()) {
+          return { empty: true };
+        }
+
+        const date = new Date(calendarYear, calendarMonth, dayNumber);
+        const key = dateKey(date);
+
+        return {
+          empty: false,
+          dayNumber,
+          key,
+          trained: state.trainingDays.includes(key),
+          isToday: key === today()
+        };
+      });
+
+      const calendarHtml = `
+        <div>
+          <div class="cal-nav">
+            <button class="ghost" onclick="changeCalendarMonth(-1)">◀</button>
+            <strong style="text-align:center;">${monthName}</strong>
+            <button class="ghost" onclick="changeCalendarMonth(1)" ${calendarOffset >= 0 ? 'disabled style="opacity:.35;"' : ''}>▶</button>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:8px;">
+            ${weekdays.map(day => `<div class="small" style="text-align:center; font-weight:800;">${day}</div>`).join('')}
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:6px;">
+            ${calendarCells.map(cell => {
+              if (cell.empty) {
+                return `<div style="aspect-ratio:1;"></div>`;
+              }
+
+              return `
+                <div style="aspect-ratio:1; border-radius:12px; display:grid; place-items:center; font-size:12px; font-weight:800;
+                  background:${cell.trained ? 'rgba(34,197,94,.22)' : 'rgba(255,255,255,.05)'};
+                  border:1px solid ${cell.isToday ? 'rgba(34,211,238,.9)' : cell.trained ? 'rgba(34,197,94,.5)' : 'rgba(255,255,255,.08)'};
+                  color:${cell.trained ? '#bbf7d0' : '#d4d4d8'};">
+                  ${cell.dayNumber}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      document.getElementById('journalContent').innerHTML = `
+        <div class="skill"><div><strong>Hunter Rank</strong><div class="small">${rank.title}</div></div><strong>Lv ${level}</strong></div>
+        <div class="skill"><div><strong>Total XP</strong><div class="small">Lifetime progression power</div></div><strong>${state.xp}</strong></div>
+        <div class="skill"><div><strong>Week Streak</strong><div class="small">Weken op rij met ${state.weeklyTarget}+ trainingen • record ${state.bestWeekStreak}</div></div><strong>${state.weekStreak}</strong></div>
+        <div class="skill"><div><strong>Deze week</strong><div class="small">Trainingsdagen in de huidige week</div></div><strong>${daysThisWeek}/${target}</strong></div>
+        <div class="skill"><div><strong>Totaal trainingen</strong><div class="small">Alle geregistreerde trainingsdagen</div></div><strong>${state.trainingDays.length}</strong></div>
+        <div class="skill"><div><strong>Daily Quest Progress</strong><div class="small">Completed sets today</div></div><strong>${completedDailySets}/${totalDailySets}</strong></div>
+        <div class="skill"><div><strong>Dungeons Cleared</strong><div class="small">Optional raids completed</div></div><strong>${state.dungeonsCleared}</strong></div>
+        <div class="skill"><div><strong>System Quests</strong><div class="small">Achievements claimed</div></div><strong>${completedQuests}/${skills.length}</strong></div>
+        <div class="skill"><div><strong>Shadow Soldiers</strong><div class="small">Companions unlocked</div></div><strong>${unlockedCompanions}/${shadowSoldiers.length}</strong></div>
+        <div class="skill"><div><strong>Shadow Beasts</strong><div class="small">Gevangen uit chests • ${state.alphaBeasts.length} alpha</div></div><strong>${state.ownedBeasts.length}/${beastPool.length}</strong></div>
+        <div class="skill"><div><strong>Scherven</strong><div class="small">${SHARDS_FOR_GUARANTEE} scherven = gegarandeerde drop</div></div><strong>${state.shards}/${SHARDS_FOR_GUARANTEE}</strong></div>
+        <div class="skill"><div><strong>Chests Opened</strong><div class="small">Dungeon reward rolls</div></div><strong>${state.chestsOpened}</strong></div>
+        <div class="skill"><div><strong>Active Aura</strong><div class="small">Current energy stage</div></div><strong>${currentAura.aura}</strong></div>
+        ${calendarHtml}
+      `;
+
+      const groupedSkills = {};
+      skills.forEach(s => {
+        if (!groupedSkills[s.rank]) groupedSkills[s.rank] = [];
+        groupedSkills[s.rank].push(s);
+      });
+
+      document.getElementById('skillList').innerHTML = Object.entries(groupedSkills).map(([rankName, rankSkills]) => {
+        return `
+          <details class="card" data-key="quest-${rankName}" ontoggle="rememberSection(this)" style="margin-bottom:12px; padding:14px; background:#18181b;">
+            <summary style="cursor:pointer; font-weight:800; font-size:18px; list-style:none; display:flex; justify-content:space-between; align-items:center;">
+              <span>📜 ${rankName} Quests</span>
+            </summary>
+
+            <div style="margin-top:14px; display:grid; gap:12px;">
+              ${rankSkills.map(s => {
+                const done = state.completedSkills.includes(s.id);
+                return `
+                  <div class="skill" style="margin-bottom:0;">
+                    <div>
+                      <strong>${s.name}</strong>
+                      <div class="small">${s.rank} • +${s.xp} XP</div>
+                    </div>
+                    <button class="ghost" ${done ? 'disabled' : ''} onclick="completeSkill('${s.id}')">
+                      ${done ? 'Gehaald' : 'Claim'}
+                    </button>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </details>
+        `;
+      }).join('');
+
+      document.getElementById('restShortOptions').innerHTML = [15, 20, 30, 45].map(sec => `
+        <button class="ghost" onclick="setRestShort(${sec})" style="${state.restShort === sec ? 'border-color:rgba(34,211,238,.9); color:#a5f3fc;' : ''}">${sec}s</button>
+      `).join('');
+
+      document.getElementById('restLongOptions').innerHTML = [30, 40, 60, 90].map(sec => `
+        <button class="ghost" onclick="setRestLong(${sec})" style="${state.restLong === sec ? 'border-color:rgba(34,211,238,.9); color:#a5f3fc;' : ''}">${sec}s</button>
+      `).join('');
+
+      document.getElementById('autoToggle').textContent = state.autoAdvance ? 'Aan' : 'Uit';
+
+      const targetChoices = [2, 3, 4, 5];
+      document.getElementById('targetOptions').innerHTML = targetChoices.map(days => `
+        <button class="ghost" onclick="setWeeklyTarget(${days})" style="${state.weeklyTarget === days ? 'border-color:rgba(34,211,238,.9); color:#a5f3fc;' : ''}">${days}x</button>
+      `).join('');
+
+      document.getElementById('feedbackToggle').textContent = state.feedback ? 'Aan' : 'Uit';
+      document.getElementById('lastBackupInfo').textContent = state.lastBackup
+        ? `Laatste export: ${state.lastBackup}`
+        : 'Nog geen backup gemaakt.';
+
+      const customInput = document.getElementById('customImage');
+      if (document.activeElement !== customInput) customInput.value = state.customImage;
+
+      document.querySelectorAll('details[data-key]').forEach(d => {
+        if (openSections.has(d.dataset.key)) d.open = true;
+      });
+
+      renderTimer();
+      window.scrollTo(0, scrollBefore);
+    }
+
+    function completeSet(id, setNumber, quiet) {
+      const key = `${id}-${setNumber}`;
+      if (state.completedSets.includes(key)) return;
+
+      const rank = currentRank();
+      const currentExercises = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
+      const exercise = currentExercises.find(e => e.id === id);
+
+      state.completedSets.push(key);
+      state.setXp[key] = exercise.xp;
+      state.xp += exercise.xp;
+
+      const allExerciseSetsDone = Array.from({ length: exercise.sets }, (_, i) => `${exercise.id}-${i + 1}`)
+        .every(setKey => state.completedSets.includes(setKey));
+
+      if (allExerciseSetsDone && !state.completed.includes(id)) {
+        state.completed.push(id);
+      }
+
+      save();
+      render();
+      if (!quiet) {
+        beep(880, 0.14);
+        buzz(20);
+      }
+      toast(`Set voltooid! +${exercise.xp} XP`);
+    }
+
+    function undoSet(id, setNumber) {
+      const key = `${id}-${setNumber}`;
+      if (!state.completedSets.includes(key)) return;
+
+      const rank = currentRank();
+      const currentExercises = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
+      const exercise = currentExercises.find(e => e.id === id);
+      if (!exercise) return;
+
+      const awarded = state.setXp[key] ?? exercise.xp;
+      state.completedSets = state.completedSets.filter(k => k !== key);
+      state.completed = state.completed.filter(exerciseId => exerciseId !== id);
+      state.xp = Math.max(0, state.xp - awarded);
+      delete state.setXp[key];
+
+      save();
+      render();
+      buzz(15);
+      toast(`Set ongedaan gemaakt \u2212${awarded} XP`);
+    }
+
+    function finishWorkout() {
+      const rank = currentRank();
+      const totalSets = circuitSteps().length;
+
+      if (state.completedSets.length !== totalSets || state.lastWorkoutDate === today()) return;
+
+      state.lastWorkoutDate = today();
+
+      if (!state.trainingDays.includes(today())) {
+        state.trainingDays.push(today());
+      }
+
+      state.streak = state.trainingDays.length;
+
+      const bonus = 100;
+      let weekMessage = '';
+      let pendingDrop = null;
+
+      const weekKey = currentWeekKey();
+      const daysThisWeek = trainingDaysInWeek(weekKey);
+
+      if (daysThisWeek >= state.weeklyTarget && state.lastBankedWeek !== weekKey) {
+        state.weekStreak += 1;
+        state.lastBankedWeek = weekKey;
+        if (state.weekStreak > state.bestWeekStreak) state.bestWeekStreak = state.weekStreak;
+        weekMessage = ` \u2022 Week gebankt! Streak ${state.weekStreak}`;
+
+        state.chestsOpened += 1;
+        pendingDrop = resolveChest(rank.title.split(':')[0].trim());
+      } else if (daysThisWeek < state.weeklyTarget) {
+        weekMessage = ` \u2022 ${daysThisWeek}/${state.weeklyTarget} deze week`;
+      }
+
+      increaseStats('daily');
+      state.xp += bonus;
+      stopTimer(true);
+      save();
+      render();
+
+      buzz([50, 60, 90]);
+      toast(`Workout klaar! +${bonus} XP${weekMessage}`);
+      if (pendingDrop) presentChest(pendingDrop, 'Week chest');
+      else beep(940, 0.3);
+    }
+
+    function completeDungeon(id) {
+      const dungeon = dungeons.find(d => d.id === id);
+      if (!dungeon) return;
+
+      const rank = currentRank();
+
+      const rankOrder = ['E-Rank', 'D-Rank', 'C-Rank', 'B-Rank', 'A-Rank', 'S-Rank'];
+      const currentRankIndex = rankOrder.indexOf(rank.title.split(':')[0].trim());
+      const dungeonRankIndex = rankOrder.indexOf(dungeon.rank);
+
+      if (dungeonRankIndex > currentRankIndex + 1) {
+        toast('Dungeon locked');
+        return;
+      }
+
+      increaseStats('dungeon', { category: dungeon.category });
+      state.xp += dungeon.xp;
+      state.dungeonsCleared += 1;
+      state.chestsOpened += 1;
+
+      const chestResult = resolveChest(rankTier());
+
+      save();
+      render();
+      toast(`Dungeon cleared! +${dungeon.xp} XP`);
+      presentChest(chestResult, `${dungeon.title} chest`);
+    }
+
+    function completePromotionBoss(id) {
+      const boss = promotionBosses.find(b => b.id === id);
+      if (!boss) return;
+      if (state.clearedPromotionBosses.includes(id)) return;
+      if (currentLevel() < boss.requiredLevel) {
+        toast('Trial locked');
+        return;
+      }
+
+      state.clearedPromotionBosses.push(id);
+      increaseStats('boss');
+      state.xp += boss.xp;
+      save();
+      render();
+      toast(`Rank promotion cleared! ${boss.toRank} unlocked`);
+    }
+
+    function completeBoss(id) {
+      if (state.completedBosses.includes(id)) return;
+      const boss = monthlyBosses.find(b => b.id === id);
+
+      const requiredLevel = parseInt(boss.requirement.replace(/[^0-9]/g, '')) || 1;
+      if (currentLevel() < requiredLevel) {
+        toast('Raid locked');
+        return;
+      }
+      state.completedBosses.push(id);
+      increaseStats('boss');
+      state.xp += boss.xp;
+      save();
+      render();
+      toast(`Boss raid cleared! +${boss.xp} XP`);
+    }
+
+    function toggleBeast(id) {
+      if (!state.ownedBeasts.includes(id)) return;
+      if (state.activeBeasts.includes(id)) {
+        state.activeBeasts = state.activeBeasts.filter(beastId => beastId !== id);
+      } else {
+        state.activeBeasts.unshift(id);
+        state.activeBeasts = state.activeBeasts.slice(0, 3);
+      }
+      save();
+      render();
+    }
+
+    function completeSkill(id) {
+      if (state.completedSkills.includes(id)) return;
+      const skill = skills.find(s => s.id === id);
+      state.completedSkills.push(id);
+      increaseStats('quest');
+      state.xp += skill.xp;
+      save();
+      render();
+      toast(`Skill unlocked! +${skill.xp} XP`);
+    }
+
+    function skipDay() {
+      const penalty = Math.max(50, Math.floor(state.xp * 0.02));
+      if (!confirm(`Dag overslaan kost ${penalty} XP. Doorgaan?`)) return;
+      state.xp = Math.max(0, state.xp - penalty);
+      state.completed = [];
+      state.completedSets = [];
+      stopTimer(true);
+      save();
+      render();
+      buzz(120);
+      toast(`System penalty: -${penalty} XP`);
+    }
+
+    function resetToday() {
+      if (!confirm('Sets van vandaag wissen? XP van die sets gaat terug.')) return;
+
+      const rank = currentRank();
+      const currentExercises = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
+      const refund = state.completedSets.reduce((sum, key) => {
+        const exercise = currentExercises.find(e => e.id === parseInt(key.split('-')[0], 10));
+        return sum + (state.setXp[key] ?? (exercise ? exercise.xp : 0));
+      }, 0);
+
+      state.xp = Math.max(0, state.xp - refund);
+      state.completed = [];
+      state.completedSets = [];
+      state.setXp = {};
+      state.lastDailyReset = today();
+      stopTimer(true);
+      save();
+      render();
+      toast(`Daily quest gereset \u2212${refund} XP`);
+    }
+
+    function hardReset() {
+      if (!confirm('Ben je zeker dat je alles wil resetten?')) return;
+      localStorage.removeItem('calisthenicsRpgStandalone');
+      location.reload();
+    }
+
+    function saveCustomImage() {
+      state.customImage = document.getElementById('customImage').value.trim();
+      if (state.customImage) state.customImageFile = '';
+      save();
+      render();
+    }
+
+    function saveCustomImageFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        toast('Kies een afbeelding');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        state.customImageFile = e.target.result;
+        state.customImage = '';
+        save();
+        render();
+        toast('Afbeelding opgeslagen');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearCustomImage() {
+      state.customImage = '';
+      state.customImageFile = '';
+      const fileInput = document.getElementById('customImageFile');
+      if (fileInput) fileInput.value = '';
+      save();
+      render();
+      toast('Afbeelding verwijderd');
+    }
+
+    function openScreen(id, button) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      button.classList.add('active');
+    }
+
+    // ---- Installable app support ----
+    // manifest.json, sw.js and the icons live next to this file.
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => { /* offline support optioneel */ });
+      });
+    }
+
+    // Ask the browser to keep the save data even under storage pressure.
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persisted().then(already => {
+        if (!already) navigator.storage.persist();
+      });
+    }
+
+    // Scherm wakker houden tijdens een lopende timer
+    let wakeLock = null;
+    async function updateWakeLock() {
+      try {
+        if (timer && !wakeLock && 'wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        } else if (!timer && wakeLock) {
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      } catch (error) { /* niet ondersteund */ }
+    }
+    setInterval(updateWakeLock, 2000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) render();
+    });
+
+    render();
+    requestAnimationFrame(pxLoop);
+  </script>
+</body>
+</html>
