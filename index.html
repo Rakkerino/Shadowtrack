@@ -16,7 +16,9 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     body { background: #09090f; color: white; min-height: 100vh; overflow-x: hidden; }
     .hunter-aura { position: absolute; inset: -55px; background: radial-gradient(circle at 50% 45%, var(--aura-main, rgba(99,102,241,.34)), var(--aura-secondary, rgba(34,211,238,.12)), transparent 62%); filter: blur(var(--aura-blur, 22px)); animation: pulseAura var(--aura-speed, 4s) ease-in-out infinite; pointer-events: none; z-index: 1; }
-    @keyframes pulseAura { 0%,100% { opacity: .45; transform: scale(1); } 50% { opacity: .95; transform: scale(1.08); } }
+    /* opacity-only: animating a blurred layer's transform forces the compositor
+       to re-rasterise the blur every frame, which is expensive on a phone */
+    @keyframes pulseAura { 0%,100% { opacity: .45; } 50% { opacity: .95; } }
     .active-companion { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 20px; background: linear-gradient(135deg, rgba(79,70,229,.28), rgba(2,6,23,.88)); border: 1px solid rgba(255,255,255,.1); margin-top: 14px; margin-bottom: 10px; position: relative; overflow: hidden; }
     .active-companion::before { content: ''; position: absolute; inset: -40%; background: radial-gradient(circle, rgba(167,139,250,.18), transparent 55%); animation: pulseAura 5s ease-in-out infinite; }
     .active-companion-emoji { position: relative; font-size: 44px; filter: drop-shadow(0 0 18px rgba(167,139,250,.8)); }
@@ -114,6 +116,20 @@
     .hero-commander.struggling canvas.pxs { filter: grayscale(.75) brightness(.7); }
     .hero-commander.thriving canvas.pxs { filter: drop-shadow(0 0 14px rgba(251,191,36,.85)); }
 
+    /* --- Timeline --- */
+    .tl-rail { position: relative; padding-left: 28px; }
+    .tl-rail::before { content:''; position: absolute; left: 11px; top: 6px; bottom: 6px; width: 2px;
+                       background: linear-gradient(to bottom, rgba(124,58,237,.55), rgba(124,58,237,.05)); }
+    .tl-month { font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; color: #7c5cd6;
+                font-weight: 800; margin: 16px 0 9px -28px; padding-left: 28px; }
+    .tl-month:first-child { margin-top: 0; }
+    .tl-item { position: relative; margin-bottom: 10px; }
+    .tl-dot { position: absolute; left: -28px; top: 4px; width: 22px; height: 22px; border-radius: 999px;
+              display: grid; place-items: center; background: #14122c; border: 2px solid; font-size: 10px; }
+    .tl-card { background: rgba(24,24,27,.9); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 10px 12px; }
+    .tl-card strong { font-size: 13px; }
+    .tl-date { font-size: 10px; color: #52525b; margin-top: 4px; }
+
     /* --- Collapsible sections --- */
     .fold { margin-bottom: 14px; }
     .fold > summary { list-style: none; cursor: pointer; display: flex; align-items: center;
@@ -129,17 +145,23 @@
     .greet-sub { font-size: 12px; color: #a1a1aa; margin-top: 2px; }
     .gear { width: 38px; height: 38px; border-radius: 12px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
             display: grid; place-items: center; font-size: 17px; cursor: pointer; }
-    .action-card { margin-bottom: 14px; border-radius: 22px; padding: 15px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer;
-                   background: linear-gradient(135deg, rgba(79,70,229,.22), rgba(14,165,233,.10)); border: 1px solid rgba(255,255,255,.1); }
-    .action-card .ic { width: 42px; height: 42px; border-radius: 13px; background: rgba(255,255,255,.12); display: grid; place-items: center; font-size: 19px; flex: 0 0 auto; }
-    .action-card .info h4 { font-size: 15px; font-weight: 850; }
-    .action-card .info p { font-size: 11.5px; color: #a1a1aa; margin-top: 2px; }
-    .action-card .go { margin-left: auto; color: #a5f3fc; font-size: 22px; }
-    .quest-card { margin-bottom: 14px; padding: 15px; border-radius: 20px; border: 1px solid rgba(226,62,87,.45);
-                  background: linear-gradient(160deg, rgba(226,62,87,.16), rgba(12,11,22,.9)); }
-    .quest-card h3 { font-size: 15px; color: #fda4af; letter-spacing: .3px; }
-    .quest-card p { font-size: 12.5px; color: #d4d4d8; line-height: 1.55; margin-top: 6px; }
-    .quest-card .reward { margin-top: 8px; font-size: 12px; font-weight: 800; color: #fde68a; }
+    /* Cards size to their content: no min-heights, and any empty child
+       collapses instead of leaving a void inside the box. */
+    .quest-card { margin-bottom: 14px; padding: 18px 16px; border-radius: 20px; border: 1px solid rgba(226,62,87,.45);
+                  background: linear-gradient(160deg, rgba(226,62,87,.16), rgba(12,11,22,.9));
+                  text-align: center; display: flex; flex-direction: column; align-items: center;
+                  justify-content: center; gap: 2px; min-height: 0; }
+    .quest-card > *:empty { display: none !important; }
+    .quest-card > * { width: 100%; }
+    .quest-card h3 { font-size: 13px; color: #fda4af; letter-spacing: 1.8px; font-weight: 900; }
+    .deload-card { border-color: rgba(74,222,128,.45); background: linear-gradient(160deg, rgba(74,222,128,.14), rgba(12,11,22,.9)); }
+    .deload-card h3 { color: #86efac; }
+    .deload-active { border-color: rgba(34,211,238,.4); background: linear-gradient(160deg, rgba(34,211,238,.12), rgba(12,11,22,.9)); }
+    .deload-active h3 { color: #a5f3fc; }
+    .quest-card p { font-size: 16px; color: #f4f4f5; line-height: 1.45; margin-top: 10px; font-weight: 700;
+                    max-width: 26ch; margin-left: auto; margin-right: auto; }
+    .quest-card .reward { margin-top: 12px; font-size: 13px; font-weight: 850; color: #fde68a; line-height: 1.45; }
+    .quest-card .small { font-size: 12px; }
     .hero-photo { position: absolute; inset: 0; background-size: cover; background-position: center; filter: grayscale(1) contrast(1.05); display: none; }
     .hero-tint { position: absolute; inset: 0; mix-blend-mode: color; display: none; }
     .hero.has-photo .hero-photo, .hero.has-photo .hero-tint { display: block; }
@@ -180,8 +202,11 @@
                          animation: gateSpin 16s linear infinite; }
     @keyframes gateSpin { to { transform: rotate(360deg); } }
     .gate-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; }
+    .gate-row { display: flex; align-items: center; gap: 13px; margin-top: 10px; position: relative; z-index: 2; }
+    .gate-icon { flex: 0 0 auto; filter: drop-shadow(0 0 8px rgba(226,62,87,.45)); }
+    .gate-icon-sm { flex: 0 0 auto; opacity: .85; }
     .gate-timer { font-size: 10.5px; font-weight: 800; color: #fbbf24; background: rgba(0,0,0,.35); padding: 3px 8px; border-radius: 999px; }
-    .gate-name { font-size: 18px; font-weight: 900; margin-top: 10px; position: relative; z-index: 2; }
+    .gate-name { font-size: 18px; font-weight: 900; }
     .gate-sub { font-size: 11.5px; color: #fda4af; margin-top: 2px; position: relative; z-index: 2; font-weight: 700; }
     .gate-list { margin-top: 12px; position: relative; z-index: 2; display: grid; gap: 6px; }
     .gate-ex { display: flex; justify-content: space-between; font-size: 12.5px; padding: 7px 10px;
@@ -257,6 +282,10 @@
     .circuit-row.up-next { border-color: rgba(167,139,250,.55); }
     .circuit-row .set-btn { flex: 0 0 auto; width: 52px; text-align: center; padding: 12px 0; font-size: 15px; }
     canvas.pxs { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+                               transition-duration: .001ms !important; }
+    }
     .sprite { width: 100%; height: 100%; display: grid; place-items: center; }
     /* Every sprite container is a square, so the canvas simply fills it.
        Relying on the canvas's own 64px intrinsic size meant narrow phone
@@ -335,17 +364,27 @@
         </div>
       </div>
 
-      <div class="action-card" id="actionCard" onclick="document.getElementById('dailyCard').scrollIntoView({behavior:'smooth'})">
-        <div class="ic">▶️</div>
-        <div class="info"><h4 id="actionTitle">Today's circuit</h4><p id="actionSub"></p></div>
-        <div class="go">›</div>
+      <div class="quest-card deload-card" id="deloadCard" style="display:none;">
+        <h3>◈ DELOAD AVAILABLE</h3>
+        <p id="deloadBody"></p>
+        <div class="reward" id="deloadReward"></div>
+        <div style="display:flex; gap:8px; margin-top:14px; width:100%;">
+          <button class="primary" style="flex:1; min-height:46px;" onclick="startDeload()">Take the deload</button>
+          <button class="ghost" style="flex:1; min-height:46px;" onclick="skipDeload()">Push on</button>
+        </div>
+      </div>
+
+      <div class="quest-card deload-active" id="deloadActive" style="display:none;">
+        <h3>◈ DELOAD WEEK</h3>
+        <p id="deloadActiveBody"></p>
+        <div class="reward" id="deloadActiveNote" style="color:#a5f3fc;"></div>
       </div>
 
       <div class="quest-card" id="reawakenCard" style="display:none;">
         <h3>⚠ REAWAKENING</h3>
         <p id="reawakenBody"></p>
         <div class="reward" id="reawakenReward"></div>
-        <p class="small" style="margin-top:8px;">Complete one full session and the System restores half of it.</p>
+        <p class="small" style="margin-top:10px;">The record stands. Only the streak lapsed.</p>
       </div>
 
       <div class="card" style="padding:14px; margin-bottom:14px; background:rgba(79,70,229,.12); border:1px solid rgba(255,255,255,.08);">
@@ -370,7 +409,7 @@
 
       <div class="card" id="dailyCard">
         <div class="card-header">
-          <div><h2>Daily Quest</h2><p class="small">Complete your circuit to earn XP and shadow progress.</p></div>
+          <div><h2>Daily Quest</h2><p class="small" id="dailyMeta">Complete your circuit to earn XP and shadow progress.</p></div>
           <div style="display:flex; gap:8px;">
             <button class="ghost" onclick="skipDay()">Dag overgeslagen</button>
             <button class="ghost" onclick="resetToday()">Reset</button>
@@ -799,13 +838,49 @@
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     }
 
+    // Difficulty is rolled fresh each month and scales with your weekly target.
+    // A week yields (target) workout hits plus 1 bonus hit for banking it, so a
+    // full month at 3x/week is about 17 hits.
+    const SIEGE_TIERS = {
+      easy:   { label: 'Lesser Siege',  share: 0.5,  trophy: 'bronze', color: '#c084a0', beast: 'ursine',
+                blurb: 'About half a month of training.' },
+      normal: { label: 'Siege',         share: 0.75, trophy: 'silver', color: '#cbd5e1', beast: 'wyrm',
+                blurb: 'Roughly three weeks of training.' },
+      hard:   { label: 'Greater Siege', share: 1.0,  trophy: 'gold',   color: '#fbbf24', beast: 'drake',
+                blurb: 'A full month with no missed sessions.' }
+    };
+    const TROPHY_COLORS = { bronze: '#c88a52', silver: '#cbd5e1', gold: '#fbbf24' };
+
+    function siegeHitsPerMonth() {
+      return Math.round(4.345 * (state.weeklyTarget + 1));
+    }
+
+    function rollSiegeTier(monthKey) {
+      // seeded by month so it is stable, and never the same tier twice running
+      let h = 0;
+      for (let i = 0; i < monthKey.length; i++) h = (h * 31 + monthKey.charCodeAt(i)) >>> 0;
+      const keys = ['easy', 'normal', 'hard'];
+      let pick = keys[h % 3];
+      if (pick === state.lastSiegeTier) pick = keys[(h + 1) % 3];
+      return pick;
+    }
+
     function refreshSiege() {
       const mk = siegeMonthKey();
       if (state.siegeMonth !== mk) {
+        const tier = rollSiegeTier(mk);
+        const hp = Math.max(4, Math.round(siegeHitsPerMonth() * SIEGE_TIERS[tier].share));
+        state.lastSiegeTier = state.siegeTier || '';
         state.siegeMonth = mk;
-        state.siegeMax = 12;
-        state.siegeHp = 12;
+        state.siegeTier = tier;
+        state.siegeMax = hp;
+        state.siegeHp = hp;
         save();
+      }
+      if (!state.siegeTier) {
+        state.siegeTier = 'normal';
+        state.siegeMax = state.siegeMax || Math.round(siegeHitsPerMonth() * 0.75);
+        state.siegeHp = Math.min(state.siegeHp, state.siegeMax);
       }
     }
 
@@ -815,15 +890,21 @@
       if (state.siegeHp <= 0) return null;
       state.siegeHp = Math.max(0, state.siegeHp - n);
       if (state.siegeHp === 0) {
-        if (!state.trophies.includes(state.siegeMonth)) state.trophies.push(state.siegeMonth);
-        addTimeline('siege', 'Siege broken', 'Trophy earned');
+        const tier = SIEGE_TIERS[state.siegeTier] || SIEGE_TIERS.normal;
+        if (!state.trophies.some(t => trophyMonth(t) === state.siegeMonth)) {
+          state.trophies.push({ month: state.siegeMonth, tier: tier.trophy });
+        }
+        addTimeline('siege', `${tier.label} broken`, `${tier.trophy} trophy earned`);
         return 'broken';
       }
       return 'hit';
     }
 
-    function trophySvg(dim) {
-      const c = dim ? '#3f3f46' : '#fbbf24';
+    function trophyMonth(t) { return typeof t === 'string' ? t : t.month; }
+    function trophyTier(t) { return typeof t === 'string' ? 'silver' : (t.tier || 'silver'); }
+
+    function trophySvg(dim, tier) {
+      const c = dim ? '#3f3f46' : (TROPHY_COLORS[tier] || '#fbbf24');
       return `<svg viewBox="0 0 100 100">
         <path d="M30 20 L70 20 L67 46 C67 60 58 68 50 68 C42 68 33 60 33 46 Z" fill="${c}"/>
         <path d="M30 20 C18 22 14 32 20 42 M70 20 C82 22 86 32 80 42" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>
@@ -920,6 +1001,7 @@
 
       const frames = SPRITE_FRAMES[key] || 0;
       const still = STILL_SPRITES.includes(key);
+      el._static = still && el.dataset.once !== '1';
       let name = key;
       let bob = 0;
 
@@ -943,6 +1025,7 @@
       const img = spriteImage(name);
       if (img.complete && img.naturalWidth) {
         ctx.drawImage(img, 0, bob, box, box);
+        el._painted = true;
       }
 
       if (!still && scale >= 3 && !document.hidden) {
@@ -963,19 +1046,42 @@
       }
     }
 
+    // Sprite frames change every 190ms, so painting at 60fps burns battery for
+    // no visible gain. Cap the loop, cache the node list between renders, and
+    // let static sprites paint once instead of every frame.
+    const PX_FPS = 15;
+    const PX_MIN_DELTA = 1000 / PX_FPS;
+    let pxNodes = null, pxLast = 0, pxRaf = null;
+
+    function invalidateSpriteCache() { pxNodes = null; }
+
+    function visibleSprites() {
+      if (pxNodes) return pxNodes;
+      pxNodes = [];
+      for (const el of document.querySelectorAll('canvas[data-sprite]')) {
+        const screen = el.closest('.screen');
+        el._offscreen = !!(screen && !screen.classList.contains('active'));
+        pxNodes.push(el);
+      }
+      return pxNodes;
+    }
+
     function pxLoop(t) {
-      if (!document.hidden) {
-        const nodes = document.querySelectorAll('canvas[data-sprite]');
-        for (const el of nodes) {
-          // skip sprites sitting inside a screen that is not the active one;
-          // modals, overlays and floating beasts live outside any screen and always paint
-          const screen = el.closest('.screen');
-          if (screen && !screen.classList.contains('active')) continue;
+      pxRaf = null;
+      if (!document.hidden && t - pxLast >= PX_MIN_DELTA) {
+        pxLast = t;
+        for (const el of visibleSprites()) {
+          if (el._offscreen) continue;
+          if (!el.isConnected) { invalidateSpriteCache(); break; }
+          if (el._static && el._painted) continue;
           pxPaint(el, t);
         }
       }
-      requestAnimationFrame(pxLoop);
+      pxRaf = requestAnimationFrame(pxLoop);
     }
+
+    function startPxLoop() { if (pxRaf === null) pxRaf = requestAnimationFrame(pxLoop); }
+    function stopPxLoop() { if (pxRaf !== null) { cancelAnimationFrame(pxRaf); pxRaf = null; } }
 
     // ---------------- Gates, Trials ----------------
     const GATES = {"core":{"name":"Core Gate","accent":"#38bdf8","glyph":"core","ranks":{"E":[["Dead bug","30 sec"],["Bird dog","30 sec"],["Forearm plank","30 sec"],["Glute bridge march","30 sec"]],"D":[["Dead bug slow","40 sec"],["Forearm plank","45 sec"],["Side plank","20 sec per side"],["Lying leg raise","30 sec"]],"C":[["Hollow body hold","40 sec"],["Side plank with reach","25 sec per side"],["Mountain climbers","40 sec"],["V-sit hold","30 sec"]],"B":[["Hollow body hold","50 sec"],["Side plank with reach","30 sec per side"],["Slow mountain climbers","50 sec"],["V-sit hold","40 sec"]],"A":[["Hollow rocks","45 sec"],["Weighted plank (backpack)","50 sec"],["Shoulder taps slow","45 sec"],["Full lying leg raises","40 sec"]],"S":[["Hollow rocks","60 sec"],["Weighted plank (backpack)","60 sec"],["Slow shoulder taps","60 sec"],["Full lying leg raises","50 sec"]]}},"legs":{"name":"Leg Gate","accent":"#4ade80","glyph":"legs","ranks":{"E":[["Glute bridge","40 sec"],["Wall sit","30 sec"],["Standing calf raise","40 sec"],["Step-back lunge","40 sec"]],"D":[["Glute bridge march","45 sec"],["Wall sit","45 sec"],["Slow calf raise","45 sec"],["Reverse lunge","20 sec per side"]],"C":[["Cossack squat","25 sec per side"],["Single-leg RDL","25 sec per side"],["Jump squats","40 sec"],["Wall sit","60 sec"]],"B":[["Cossack squat","30 sec per side"],["Single-leg RDL slow","30 sec per side"],["Jump squats","50 sec"],["Wall sit","75 sec"]],"A":[["Pistol squat negatives","25 sec per side"],["Shrimp squat","25 sec per side"],["Single-leg calf raise","25 sec per side"],["Broad jump repeats","45 sec"]],"S":[["Pistol squat negatives","30 sec per side"],["Shrimp squat","30 sec per side"],["Single-leg calf raise","30 sec per side"],["Broad jump repeats","60 sec"]]}},"push":{"name":"Push Gate","accent":"#c084fc","glyph":"push","ranks":{"E":[["Wall push-up","40 sec"],["Knee push-up","30 sec"],["Pike hold","30 sec"]],"D":[["Incline push-up","40 sec"],["Negative push-up","40 sec"],["Pike hold","40 sec"]],"C":[["Push-up","40 sec"],["Diamond push-up","30 sec"],["Pike push-up","30 sec"]],"B":[["Push-up slow tempo","50 sec"],["Diamond push-up","40 sec"],["Pike push-up","40 sec"]],"A":[["Archer push-up","25 sec per side"],["Wall-assisted handstand hold","30 sec"],["Deep pike push-up","40 sec"]],"S":[["Archer push-up","30 sec per side"],["Wall handstand hold","45 sec"],["Deep pike push-up","50 sec"]]}},"pull":{"name":"Pull Gate","accent":"#60a5fa","glyph":"pull","note":"Isometric back work \u2014 no equipment needed. A towel over a door handle can be added later as an optional upgrade.","ranks":{"E":[["Prone Y-T-W raises","40 sec"],["Superman hold","30 sec"],["Lying scapular squeezes","40 sec"]],"D":[["Prone Y-T-W raises","50 sec"],["Superman hold","40 sec"],["Prone snow angels","40 sec"]],"C":[["Superman with arm/leg lift","40 sec"],["Prone snow angels","45 sec"],["Reverse plank hold","30 sec"]],"B":[["Superman with arm/leg lift","50 sec"],["Paused snow angels","50 sec"],["Reverse plank hold","45 sec"]],"A":[["Weighted Superman (backpack)","45 sec"],["Paused snow angels","50 sec"],["Single-arm reach plank","25 sec per side"]],"S":[["Weighted Superman (backpack)","60 sec"],["Paused snow angels","60 sec"],["Single-arm reach plank","30 sec per side"]]}},"mind":{"name":"Mind Gate","accent":"#a5f3fc","glyph":"mind","note":"Recovery work. Counts as a Gate clear, pairs naturally with a deload week.","ranks":{"E":[["Box breathing 4-4-4-4","3 min"],["Lying body scan","3 min"]],"D":[["Box breathing 4-4-4-4","4 min"],["Lying body scan","4 min"]],"C":[["Seated breath awareness","5 min"],["Progressive muscle relaxation","5 min"]],"B":[["Seated breath awareness","7 min"],["Progressive muscle relaxation","6 min"]],"A":[["Seated stillness","10 min"],["Slow breath ladder","5 min"]],"S":[["Seated stillness","15 min"],["Slow breath ladder","6 min"]]}}};
@@ -989,6 +1095,14 @@
       let h = 0;
       for (let i = 0; i < wk.length; i++) h = (h * 31 + wk.charCodeAt(i)) >>> 0;
       return GATE_KEYS[h % GATE_KEYS.length];
+    }
+
+    // The archway glyph from the design pass, tinted per gate.
+    function gateGlyph(color, size) {
+      return `<svg viewBox="0 0 40 44" width="${size || 40}" height="${(size || 40) * 1.1}" style="display:block;">
+        <path d="M4 44 L4 18 C4 7 11 2 20 2 C29 2 36 7 36 18 L36 44" fill="none" stroke="${color}" stroke-width="3.4" stroke-linecap="round"/>
+        <path d="M11 44 L11 20 C11 12 15 9 20 9 C25 9 29 12 29 20 L29 44" fill="none" stroke="${color}" stroke-width="2" opacity=".5"/>
+      </svg>`;
     }
 
     function gateExercises(gateKey, tierLetter) {
@@ -1018,7 +1132,10 @@
       { id:'alphatamer',  name:'Alpha Tamer',    color:'#fde68a', desc:'First Alpha upgrade earned' },
       { id:'marathoner',  name:'Marathoner',     color:'#a5f3fc', desc:'6 months of continuous activity' },
       { id:'veteran',     name:'Veteran',        color:'#94a3b8', desc:'One year since your first workout' },
-      { id:'siegebreaker',name:'Siege Breaker',  color:'#fbbf24', desc:'First monthly Siege broken' },
+      { id:'siegebreaker',name:'Siege Breaker',  color:'#c88a52', desc:'First monthly Siege broken' },
+      { id:'ironclad',    name:'Ironclad',       color:'#fbbf24', desc:'Break a Greater Siege \u2014 a full month, no misses' },
+      { id:'warlord',     name:'Warlord',        color:'#fbbf24', desc:'Three gold trophies earned' },
+      { id:'measured',    name:'Measured',       color:'#4ade80', desc:'Took a deload week without breaking the streak' },
       { id:'trialborn',   name:'Trial-born',     color:'#e23e57', desc:'Cleared a Trial the day it unlocked' },
       { id:'monarch',     name:'Shadow Monarch', color:'#fbbf24', desc:'S-Rank reached' },
       { id:'beastlord',   name:'Beast Lord',     color:'#e879f9', desc:'Every beast available at your rank' },
@@ -1040,6 +1157,10 @@
       if (state.comebacks > 0) out.push('comeback');
       if (state.alphaBeasts.length > 0) out.push('alphatamer');
       if (state.trophies.length > 0) out.push('siegebreaker');
+      if (state.deloadsTaken > 0) out.push('measured');
+      const golds = state.trophies.filter(t => trophyTier(t) === 'gold').length;
+      if (golds >= 1) out.push('ironclad');
+      if (golds >= 3) out.push('warlord');
       if (state.trialSameDay) out.push('trialborn');
       if (currentRank().title.startsWith('S-Rank')) out.push('monarch');
       const reachable = availableBeasts(rankTier());
@@ -1090,7 +1211,7 @@
                  'The Trial is behind you. {rank} is what remains.',
                  'Few reach {rank}. Fewer stop here.'],
       weekBanked:['Week secured. Streak stands at {streak}.',
-                 'Three days met. The week is yours.',
+                 '{target} sessions met. The week is yours.',
                  'Quota fulfilled. {streak} weeks unbroken.',
                  'Another week closed cleanly. {streak} in a row.',
                  'The System logs this week as complete.'],
@@ -1103,7 +1224,7 @@
                  'The week went unclaimed. Start the next one now.',
                  'Progress is not lost, only the streak. Begin again.',
                  'The counter resets. The level does not.',
-                 'One missed week is a week. It is not a pattern yet.'],
+                 'One missed week is one week. It is not a pattern yet.'],
       newGeneral:['{general} has entered your service.',
                  'A shadow rose to answer you: {general}.',
                  '{general} stands with you now.',
@@ -1114,7 +1235,7 @@
                  'The System notes {streak} weeks of compliance.',
                  '{streak} weeks unbroken. The pattern is the point.',
                  'This is what {streak} weeks of not quitting looks like.'],
-      deload:   ['Eight weeks unbroken. A lighter week is not a failure.',
+      deload:   ['{streak} weeks unbroken. A lighter week is not a failure.',
                  'Recovery is training you are not doing yet.',
                  'The System permits rest. The streak will hold.',
                  'Sustainable pace beats a broken one. Consider a deload.',
@@ -1129,17 +1250,22 @@
                  'Rest earned, not taken.',
                  'The week is closed. Come back when you are ready.',
                  'You have already done what this week asked.'],
+      deloadActive: ['Deload week. Two rounds. The streak holds.',
+                 'Lighter work, same commitment. {n} sessions this week.',
+                 'Recovery in progress. The army waits.',
+                 'The System reduced your load, not your rank.',
+                 'A lighter week is still a week.'],
       idle:     ['The System is watching. Begin when ready.',
                  '{rank}. The next threshold does not move closer on its own.',
                  'No urgency today. Only opportunity.',
-                 'The gate is open whenever you are.',
-                 'Daily quest available.']
+                 'The gate is open whenever you are ready.',
+                 'Daily Quest available.']
     };
 
     const SYSTEM_TONES = {
       reawaken:'alert', trial:'triumph', trialSoon:'progress', rankUp:'triumph',
       weekBanked:'triumph', lastDay:'warn', weekLost:'alert', newGeneral:'triumph',
-      milestone:'triumph', deload:'notice', midweek:'progress', restday:'notice', idle:'notice'
+      milestone:'triumph', deload:'notice', deloadActive:'progress', midweek:'progress', restday:'notice', idle:'notice'
     };
 
     function daysSinceLastWorkout() {
@@ -1153,7 +1279,7 @@
       const rank = currentRank();
       const wk = currentWeekKey();
       const done = trainingDaysInWeek(wk);
-      const target = state.weeklyTarget;
+      const target = weeklyTargetNow();
       const gap = daysSinceLastWorkout();
 
       if (gap >= 14 && state.trainingDays.length > 0) return { key:'reawaken', v:{} };
@@ -1169,10 +1295,11 @@
       if (state.lastGeneralDate === today() && state.lastGeneralName) return { key:'newGeneral', v:{ general: state.lastGeneralName } };
       if (state.lastBankedWeek === wk && state.lastWorkoutDate === today()) {
         if ([4, 8, 12, 26, 52].includes(state.weekStreak)) return { key:'milestone', v:{ streak: state.weekStreak } };
-        return { key:'weekBanked', v:{ streak: state.weekStreak } };
+        return { key:'weekBanked', v:{ streak: state.weekStreak, target } };
       }
       if (state.weekStreak === 0 && state.bestWeekStreak > 0 && done === 0) return { key:'weekLost', v:{} };
-      if (state.weekStreak >= 8) return { key:'deload', v:{} };
+      if (deloadActive()) return { key:'deloadActive', v:{ n: deloadTarget() } };
+      if (deloadDue()) return { key:'deload', v:{ streak: state.weekStreak } };
       if (done >= target) return { key:'restday', v:{} };
       if (done === target - 1) return { key:'lastDay', v:{ done, target } };
       if (done > 0) return { key:'midweek', v:{ done, target, unlock: (nextUnlock(level) || {}).label || 'the next threshold' } };
@@ -1183,7 +1310,9 @@
       const st = systemState();
       const lines = SYSTEM_LINES[st.key];
       const pick = lines[new Date().getDate() % lines.length];
-      const text = pick.replace(/\{(\w+)\}/g, (m, k) => st.v[k] !== undefined ? st.v[k] : m);
+      const filled = pick.replace(/\{(\w+)\}/g, (m, k) => st.v[k] !== undefined ? st.v[k] : m);
+      // a substituted 1 would otherwise read "1 sessions"
+      const text = filled.replace(/\b1 (session|week|day|round|hit)s\b/g, '1 $1');
       return { text, tone: SYSTEM_TONES[st.key], key: st.key };
     }
 
@@ -1611,6 +1740,15 @@
     state.siegeMonth ??= '';
     state.siegeHp ??= 12;
     state.siegeMax ??= 12;
+    state.siegeTier ??= '';
+    state.lastSiegeTier ??= '';
+    state.pinnedTitle ??= '';
+    state.titleOrder ??= [];
+    state.deloadWeek ??= '';
+    state.deloadTakenAt ??= 0;
+    state.deloadsTaken ??= 0;
+    // trophies used to be plain month strings; give those the middle tier
+    state.trophies = (state.trophies || []).map(t => typeof t === 'string' ? { month: t, tier: 'silver' } : t);
     state.reawakenings ??= 0;
     state.comebacks ??= 0;
     state.trialSameDay ??= false;
@@ -2098,10 +2236,51 @@
     }
 
     // Circuit: ronde 1 = set 1 van alle oefeningen, dan ronde 2, dan ronde 3.
+    // ---------------- Deload ----------------
+    // Every 8th banked week the System offers a lighter week: two rounds instead
+    // of three, and a reduced target. Complete it and the streak continues, so
+    // recovery counts as compliance rather than failure.
+    const DELOAD_EVERY = 8;
+
+    function deloadDue() {
+      return state.weekStreak > 0
+        && state.weekStreak % DELOAD_EVERY === 0
+        && state.deloadTakenAt !== state.weekStreak;
+    }
+
+    function deloadActive() {
+      return state.deloadWeek === currentWeekKey();
+    }
+
+    function deloadTarget() {
+      return Math.max(1, Math.ceil(state.weeklyTarget / 2));
+    }
+
+    function weeklyTargetNow() {
+      return deloadActive() ? deloadTarget() : state.weeklyTarget;
+    }
+
+    function startDeload() {
+      state.deloadWeek = currentWeekKey();
+      state.deloadTakenAt = state.weekStreak;
+      state.deloadsTaken += 1;
+      save(); render();
+      addTimeline('deload', 'Deload week taken', `${deloadTarget()} sessions \u00b7 2 rounds \u00b7 streak protected`);
+      toast(`Deload week \u00b7 ${deloadTarget()} sessions, 2 rounds`);
+    }
+
+    function skipDeload() {
+      state.deloadTakenAt = state.weekStreak;
+      save(); render();
+      toast('Deload declined \u00b7 normal week');
+    }
+
     function circuitSteps() {
       const rank = currentRank();
       const exercises = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
-      const maxRounds = Math.max(...exercises.map(e => e.sets));
+      const maxRounds = deloadActive()
+        ? Math.max(1, Math.max(...exercises.map(e => e.sets)) - 1)
+        : Math.max(...exercises.map(e => e.sets));
       const steps = [];
       for (let round = 1; round <= maxRounds; round++) {
         exercises.forEach(exercise => {
@@ -2168,6 +2347,7 @@
     }
 
     function runTimer() {
+      updateWakeLock();
       clearInterval(timerTick);
       timerTick = setInterval(() => {
         if (!timer || timer.paused) return;
@@ -2310,6 +2490,7 @@
       clearInterval(timerTick);
       timerTick = null;
       timer = null;
+      updateWakeLock();
       render();
     }
 
@@ -2554,7 +2735,7 @@
 
       const weekKey = currentWeekKey();
       const daysThisWeek = trainingDaysInWeek(weekKey);
-      const target = state.weeklyTarget;
+      const target = weeklyTargetNow();
       const ringPct = Math.min(1, daysThisWeek / target);
       const circumference = 2 * Math.PI * 32;
       document.getElementById('weekRing').innerHTML = `
@@ -2636,27 +2817,41 @@
       const wkNow = currentWeekKey();
       const doneNow = trainingDaysInWeek(wkNow);
       document.getElementById('greetSub').textContent =
-        `${new Date().toLocaleDateString('en-GB', { weekday: 'long' })} \u00b7 ${doneNow}/${state.weeklyTarget} this week \u00b7 streak ${state.weekStreak}`;
+        `${new Date().toLocaleDateString('en-GB', { weekday: 'long' })} \u00b7 ${doneNow}/${weeklyTargetNow()} this week \u00b7 streak ${state.weekStreak}${deloadActive() ? ' \u00b7 deload' : ''}`;
 
-      // action card: what today's circuit actually is
       const circuitTier = rankTier();
-      const est = Math.round(sessionMinutesEstimate());
-      document.getElementById('actionTitle').textContent = state.lastWorkoutDate === today()
-        ? 'Today\u2019s circuit complete'
-        : `Today: ${circuitTier} circuit`;
-      document.getElementById('actionSub').textContent = state.lastWorkoutDate === today()
-        ? 'Rest, or clear a Gate on top'
-        : `${currentExercises.length} exercises \u00b7 3 rounds \u00b7 ~${est} min`;
+
+      // deload offer / active banner
+      const dlCard = document.getElementById('deloadCard');
+      const dlActive = document.getElementById('deloadActive');
+      if (deloadActive()) {
+        dlCard.style.display = 'none';
+        dlActive.style.display = '';
+        document.getElementById('deloadActiveBody').innerHTML =
+          `Two rounds instead of three.<br>${deloadTarget()} session${deloadTarget() === 1 ? '' : 's'} banks the week.`;
+        document.getElementById('deloadActiveNote').textContent =
+          `Streak of ${state.weekStreak} protected`;
+      } else if (deloadDue()) {
+        dlActive.style.display = 'none';
+        dlCard.style.display = '';
+        document.getElementById('deloadBody').innerHTML =
+          `${state.weekStreak} weeks unbroken.<br>Recovery is training you are not doing yet.`;
+        document.getElementById('deloadReward').innerHTML =
+          `${deloadTarget()} session${deloadTarget() === 1 ? '' : 's'} \u00b7 2 rounds<br>streak protected`;
+      } else {
+        dlCard.style.display = 'none';
+        dlActive.style.display = 'none';
+      }
 
       // reawakening quest card
       const rwCard = document.getElementById('reawakenCard');
       const gapNow = daysSinceLastWorkout();
       if (state.lostStreak > 0 && gapNow >= 14 && state.trainingDays.length > 0) {
         rwCard.style.display = '';
-        document.getElementById('reawakenBody').textContent =
-          `You have been absent ${gapNow} days. Your streak of ${state.lostStreak} weeks was severed \u2014 but the record stands.`;
-        document.getElementById('reawakenReward').textContent =
-          `Reward: week streak restored to ${Math.ceil(state.lostStreak / 2)} \u00b7 title \u201cReturned\u201d`;
+        document.getElementById('reawakenBody').innerHTML =
+          `Absent ${gapNow} days.<br>Your ${state.lostStreak}-week streak was severed.`;
+        document.getElementById('reawakenReward').innerHTML =
+          `One session restores it to ${Math.ceil(state.lostStreak / 2)}`;
       } else {
         rwCard.style.display = 'none';
       }
@@ -2676,6 +2871,13 @@
       const hunterInput = document.getElementById('hunterName');
       if (hunterInput && document.activeElement !== hunterInput) hunterInput.value = state.hunterName || '';
 
+      const dailyMeta = document.getElementById('dailyMeta');
+      if (dailyMeta) {
+        dailyMeta.textContent = state.lastWorkoutDate === today()
+          ? 'Complete \u00b7 rest, or clear a Gate on top'
+          : `${circuitTier} circuit \u00b7 ${currentExercises.length} exercises \u00b7 ${deloadActive() ? 2 : 3} rounds${deloadActive() ? ' \u00b7 deload' : ''} \u00b7 ~${Math.round(sessionMinutesEstimate())} min`;
+      }
+
       const msg = systemMessage();
       const msgEl = document.getElementById('systemMessage');
       msgEl.className = 'sys-msg ' + msg.tone;
@@ -2692,25 +2894,40 @@
       document.getElementById('commanderName').textContent = activeCompanion ? `${activeCompanion.name} \u00b7 ${moodWord}` : '';
 
       const titles = earnedTitles();
+
+      // remember the order titles were earned in, so "most recent" is real
+      titles.forEach(id => { if (!state.titleOrder.includes(id)) state.titleOrder.push(id); });
+      state.titleOrder = state.titleOrder.filter(id => titles.includes(id));
+      if (state.pinnedTitle && !titles.includes(state.pinnedTitle)) state.pinnedTitle = '';
+
       const titlesList = document.getElementById('titlesList');
       if (titlesList) {
-        document.getElementById('titlesSummary').textContent = `${titles.length} / ${TITLES.length} earned`;
+        document.getElementById('titlesSummary').textContent = `${titles.length} / ${TITLES.length} earned \u00b7 tap to pin`;
         titlesList.innerHTML = TITLES.map(t => {
           const has = titles.includes(t.id);
-          return `<div class="skill" style="opacity:${has ? 1 : .45};">
-            <div style="display:flex;align-items:center;gap:10px;">
+          const pinned = state.pinnedTitle === t.id;
+          return `<div class="skill" style="opacity:${has ? 1 : .45}; ${pinned ? 'border-color:' + t.color + '66;' : ''}"
+            ${has ? `onclick="pinTitle('${t.id}')"` : ''}>
+            <div style="display:flex;align-items:center;gap:10px;${has ? 'cursor:pointer;' : ''}">
               <span class="title-chip" style="color:${has ? t.color : '#71717a'};border-color:${has ? t.color + '55' : 'rgba(255,255,255,.12)'};background:${has ? t.color + '14' : 'transparent'};">${t.name}</span>
               <span class="small">${t.desc}</span>
             </div>
-            <span class="small" style="color:${has ? '#4ade80' : '#52525b'};font-weight:800;">${has ? '\u2713' : '\ud83d\udd12'}</span>
+            <span class="small" style="color:${pinned ? t.color : has ? '#4ade80' : '#52525b'};font-weight:800;">${pinned ? '\u2605 pinned' : has ? '\u2713' : '\ud83d\udd12'}</span>
           </div>`;
         }).join('');
       }
       const titleBar = document.getElementById('heroTitles');
       if (titleBar) {
-        titleBar.innerHTML = titles.slice(-2).reverse().map(id => {
-          const t = TITLES.find(x => x.id === id);
-          return t ? `<span class="title-chip" style="color:${t.color}; border-color:${t.color}55; background:${t.color}14">${t.name}</span>` : '';
+        // slot 1: the title you pinned. slot 2: the most recently earned one.
+        const latest = [...state.titleOrder].reverse().find(id => id !== state.pinnedTitle);
+        const slots = [
+          { id: state.pinnedTitle, pinned: true },
+          { id: latest, pinned: false }
+        ].filter(x => x.id);
+        titleBar.innerHTML = slots.map(sl => {
+          const t = TITLES.find(x => x.id === sl.id);
+          if (!t) return '';
+          return `<span class="title-chip" style="color:${t.color}; border-color:${t.color}55; background:${t.color}14">${sl.pinned ? '\u2605 ' : ''}${t.name}</span>`;
         }).join('');
       }
 
@@ -3018,8 +3235,13 @@
             <span class="sys-label" style="--accent:#fda4af; color:#fda4af;">This week's Gate</span>
             <span class="gate-timer">Rotates in ${daysUntilMonday()}d</span>
           </div>
-          <div class="gate-name">${gate.name}</div>
-          <div class="gate-sub">${rankTier()} \u00b7 one round \u00b7 a few minutes</div>
+          <div class="gate-row">
+            <div class="gate-icon">${gateGlyph('#fda4af', 54)}</div>
+            <div>
+              <div class="gate-name">${gate.name}</div>
+              <div class="gate-sub">${rankTier()} \u00b7 one round \u00b7 a few minutes</div>
+            </div>
+          </div>
           <div style="display:flex;gap:6px;margin-top:9px;position:relative;z-index:2;flex-wrap:wrap;">
             <span style="font-size:10px;font-weight:800;padding:4px 9px;border-radius:999px;background:rgba(251,191,36,.14);color:#fde68a;border:1px solid rgba(251,191,36,.35);">2\u00d7 drop chance</span>
             <span style="font-size:10px;font-weight:800;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.06);color:#d4d4d8;border:1px solid rgba(255,255,255,.1);">0 XP \u00b7 chest only</span>
@@ -3045,7 +3267,10 @@
               const done = gateClearedThisWeek(k);
               const ex = gateExercises(k, gateTier());
               return `<div class="skill" style="--accent:${g.accent}; border-left:3px solid ${g.accent};">
-                <div><strong>${g.name}</strong><div class="small">${ex.length} exercises \u00b7 ${ex.map(e => e.name).join(', ')}</div></div>
+                <div style="display:flex; align-items:center; gap:11px; min-width:0;">
+                  <div class="gate-icon-sm">${gateGlyph(g.accent, 30)}</div>
+                  <div style="min-width:0;"><strong>${g.name}</strong><div class="small">${ex.length} exercises \u00b7 ${ex.map(e => e.name).join(', ')}</div></div>
+                </div>
                 ${done ? '<span class="small" style="color:#4ade80;font-weight:800;">\u2713 cleared</span>'
                        : `<button class="ghost" onclick="startGate('${k}')" ${gateSession ? 'disabled' : ''}>Enter</button>`}
               </div>`;
@@ -3057,24 +3282,36 @@
       refreshSiege();
       const siegeCard = document.getElementById('siegeCard');
       if (siegeCard) {
+        const tier = SIEGE_TIERS[state.siegeTier] || SIEGE_TIERS.normal;
         const pct = state.siegeHp / state.siegeMax;
         const monthName = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
         const months = [];
         for (let i = 7; i >= 0; i--) {
           const d = new Date(); d.setMonth(d.getMonth() - i);
           const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-          months.push({ key, label: d.toLocaleDateString('en-GB', { month: 'short' }), won: state.trophies.includes(key) });
+          const won = state.trophies.find(t => trophyMonth(t) === key);
+          months.push({ key, label: d.toLocaleDateString('en-GB', { month: 'short' }), won, tier: won ? trophyTier(won) : null });
         }
+        const counts = { bronze: 0, silver: 0, gold: 0 };
+        state.trophies.forEach(t => { counts[trophyTier(t)] = (counts[trophyTier(t)] || 0) + 1; });
         siegeCard.innerHTML = `
-          <span class="sys-label" style="--accent:#fda4af; color:#fda4af;">Siege of the month</span>
-          <div class="siege-stage">${pxTag('drake', 4)}</div>
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <span class="sys-label" style="--accent:${tier.color}; color:${tier.color};">${tier.label}</span>
+            <span style="font-size:10px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;padding:4px 9px;border-radius:999px;
+              background:${tier.color}1a;color:${tier.color};border:1px solid ${tier.color}55;">${tier.trophy} trophy</span>
+          </div>
+          <div class="siege-stage">${pxTag(tier.beast, 4)}</div>
           <div style="text-align:center;font-weight:900;font-size:15px;">${monthName}</div>
-          <div class="hp-bar"><div class="hp-fill" style="width:${pct * 100}%"></div></div>
-          <div class="hp-text">${state.siegeHp} / ${state.siegeMax} hits remaining</div>
+          <p style="text-align:center;font-size:11.5px;color:#a1a1aa;margin-top:3px;">${tier.blurb}</p>
+          <div class="hp-bar"><div class="hp-fill" style="width:${pct * 100}%; background:linear-gradient(90deg, ${tier.color}, #fb7185);"></div></div>
+          <div class="hp-text" style="color:${tier.color};">${state.siegeHp} / ${state.siegeMax} hits remaining</div>
           <p style="font-size:11.5px;color:#a1a1aa;margin-top:10px;line-height:1.55;text-align:center;">
-            Every workout lands 1 hit, banking your week lands 2. No XP, no chest \u2014 only a Trophy.</p>
+            Every workout lands 1 hit, banking your week lands 2. Difficulty is rolled fresh each month and scales with your ${state.weeklyTarget}x weekly target. No XP, no chest \u2014 only a Trophy.</p>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;">
+            ${['gold','silver','bronze'].map(t => `<span style="font-size:11px;font-weight:800;color:${TROPHY_COLORS[t]};">${counts[t] || 0} ${t}</span>`).join('')}
+          </div>
           <div class="hall-grid">
-            ${months.map(m => `<div class="hall-cell ${m.won ? 'won' : ''}">${trophySvg(!m.won)}<span class="m">${m.label}</span></div>`).join('')}
+            ${months.map(m => `<div class="hall-cell ${m.won ? 'won' : ''}" style="${m.won ? `border-color:${TROPHY_COLORS[m.tier]}66;` : ''}">${trophySvg(!m.won, m.tier)}<span class="m">${m.label}</span></div>`).join('')}
           </div>`;
       }
 
@@ -3088,11 +3325,40 @@
       }
       const tl = document.getElementById('timelineList');
       if (tl) {
-        tl.innerHTML = state.timeline.length
-          ? state.timeline.slice(0, 12).map(e => `
-              <div class="skill"><div><strong>${e.title}</strong><div class="small">${e.sub}</div></div>
-              <span class="small">${e.date}</span></div>`).join('')
-          : '<p class="small">Your first rank-up, general and Gate will appear here.</p>';
+        const kindStyle = {
+          rank:     { color: '#fbbf24', icon: '\u25c6' },
+          general:  { color: '#a78bfa', icon: '\u2694' },
+          gate:     { color: '#fda4af', icon: '\u2609' },
+          siege:    { color: '#e23e57', icon: '\u2620' },
+          comeback: { color: '#f0a35a', icon: '\u21ba' },
+          deload:   { color: '#4ade80', icon: '\u25c8' }
+        };
+        if (!state.timeline.length) {
+          tl.innerHTML = '<p class="small">Your first rank-up, general and Gate will appear here.</p>';
+        } else {
+          const groups = [];
+          state.timeline.slice(0, 24).forEach(e => {
+            const label = new Date(e.date + 'T12:00:00').toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+            let g = groups.find(x => x.label === label);
+            if (!g) { g = { label, items: [] }; groups.push(g); }
+            g.items.push(e);
+          });
+          tl.innerHTML = `<div class="tl-rail">` + groups.map(g => `
+            <div class="tl-month">${g.label}</div>
+            ${g.items.map(e => {
+              const st = kindStyle[e.kind] || { color: '#7c5cd6', icon: '\u25cf' };
+              const day = new Date(e.date + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+              return `<div class="tl-item">
+                <span class="tl-dot" style="border-color:${st.color}; color:${st.color};">${st.icon}</span>
+                <div class="tl-card" style="border-left:2px solid ${st.color}44;">
+                  <strong>${e.title}</strong>
+                  <div class="small">${e.sub}</div>
+                  <div class="tl-date">${day}</div>
+                </div>
+              </div>`;
+            }).join('')}
+          `).join('') + `</div>`;
+        }
       }
 
       // ---- trial entry ----
@@ -3127,6 +3393,8 @@
       document.querySelectorAll('details[data-key]').forEach(d => {
         if (openSections.has(d.dataset.key)) d.open = true;
       });
+
+      invalidateSpriteCache();
 
       renderTimer();
       window.scrollTo(0, scrollBefore);
@@ -3221,16 +3489,19 @@
       const weekKey = currentWeekKey();
       const daysThisWeek = trainingDaysInWeek(weekKey);
 
-      if (daysThisWeek >= state.weeklyTarget && state.lastBankedWeek !== weekKey) {
+      const targetThisWeek = weeklyTargetNow();
+      if (daysThisWeek >= targetThisWeek && state.lastBankedWeek !== weekKey) {
         state.weekStreak += 1;
         state.lastBankedWeek = weekKey;
         if (state.weekStreak > state.bestWeekStreak) state.bestWeekStreak = state.weekStreak;
-        weekMessage = ` \u2022 Week gebankt! Streak ${state.weekStreak}`;
+        weekMessage = deloadActive()
+          ? ` \u00b7 Deload week banked \u00b7 streak ${state.weekStreak}`
+          : ` \u00b7 Week banked \u00b7 streak ${state.weekStreak}`;
 
         state.chestsOpened += 1;
         pendingDrop = resolveChest(rank.title.split(':')[0].trim());
-      } else if (daysThisWeek < state.weeklyTarget) {
-        weekMessage = ` \u2022 ${daysThisWeek}/${state.weeklyTarget} deze week`;
+      } else if (daysThisWeek < targetThisWeek) {
+        weekMessage = ` \u00b7 ${daysThisWeek}/${targetThisWeek} this week`;
       }
 
       increaseStats('daily');
@@ -3387,9 +3658,17 @@
     function sessionMinutesEstimate() {
       const rank = currentRank();
       const ex = rankWorkouts[rank.title] || rankWorkouts['E-Rank: Hunter'];
-      const rounds = Math.max(...ex.map(e => e.sets));
+      const rounds = deloadActive() ? Math.max(1, Math.max(...ex.map(e => e.sets)) - 1) : Math.max(...ex.map(e => e.sets));
       const work = ex.reduce((sum, e) => sum + parseDuration(e.target) * e.sets, 0);
       return (work + state.restShort * (ex.length - 1) * rounds + state.restLong * (rounds - 1)) / 60;
+    }
+
+    function pinTitle(id) {
+      if (!earnedTitles().includes(id)) return;
+      state.pinnedTitle = state.pinnedTitle === id ? '' : id;
+      save(); render();
+      const t = TITLES.find(x => x.id === id);
+      toast(state.pinnedTitle ? `Pinned: ${t.name}` : 'Title unpinned');
     }
 
     function saveHunterName() {
@@ -3471,6 +3750,7 @@
     }
 
     function openScreen(id, button) {
+      invalidateSpriteCache();
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -3506,15 +3786,21 @@
         }
       } catch (error) { /* niet ondersteund */ }
     }
-    setInterval(updateWakeLock, 2000);
-
+    // event driven rather than polled every 2 seconds
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) render();
+      if (document.hidden) {
+        stopPxLoop();
+        if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
+      } else {
+        render();
+        startPxLoop();
+        if (timer) updateWakeLock();
+      }
     });
 
     preloadSprites();
     render();
-    requestAnimationFrame(pxLoop);
+    startPxLoop();
   </script>
 </body>
 </html>
