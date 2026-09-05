@@ -944,6 +944,8 @@
     };
 
     const STILL_SPRITES = ['rank_e', 'rank_d', 'rank_c', 'rank_b', 'rank_a', 'rank_s', 'shard', 'chest_open'];
+    // these have frames, but they play once on demand rather than looping
+    const ONESHOT_SPRITES = ['chest_closed'];
     const FRAME_MS = 190;
 
     const spriteImages = {};
@@ -985,6 +987,8 @@
       el.dataset.once = '1';
       el.dataset.after = afterKey || '';
       el._onceStart = performance.now();
+      el._static = false;
+      el._painted = false;
     }
 
     function pxPaint(el, t) {
@@ -1001,7 +1005,8 @@
 
       const frames = SPRITE_FRAMES[key] || 0;
       const still = STILL_SPRITES.includes(key);
-      el._static = still && el.dataset.once !== '1';
+      const oneshotIdle = ONESHOT_SPRITES.includes(key) && el.dataset.once !== '1';
+      el._static = (still || oneshotIdle) && el.dataset.once !== '1';
       let name = key;
       let bob = 0;
 
@@ -1014,7 +1019,7 @@
         } else {
           name = key + '_' + (step + 1);
         }
-      } else if (frames && !document.hidden) {
+      } else if (frames && !ONESHOT_SPRITES.includes(key) && !document.hidden) {
         const step = Math.floor(t / FRAME_MS + el._phase) % frames;
         name = key + '_' + (step + 1);
       } else if (!still && !document.hidden) {
