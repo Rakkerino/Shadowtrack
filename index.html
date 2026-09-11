@@ -597,6 +597,21 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="unitModal" onclick="closeUnit(event)">
+    <div class="modal" style="text-align:center;" onclick="event.stopPropagation()">
+      <div id="unitArt" style="width:128px;height:128px;margin:0 auto 10px;"></div>
+      <div id="unitGrade" style="font-size:10.5px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase;"></div>
+      <h3 id="unitName" style="font-size:23px;margin-top:3px;"></h3>
+      <p id="unitType" style="font-size:12.5px;color:#a1a1aa;margin-top:2px;"></p>
+      <p id="unitLore" style="font-size:13.5px;line-height:1.6;color:#d4d4d8;margin-top:14px;text-align:left;
+         border-left:2px solid var(--unit-color,#a78bfa);padding:2px 0 2px 12px;"></p>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button class="primary" style="flex:1;" id="unitFollow" onclick="unitFollowAction()">Follow</button>
+        <button class="ghost" style="flex:1;" onclick="hideUnit()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="chestModal">
     <div class="modal" style="text-align:center;">
       <div class="chest-stage" id="chestStage">
@@ -1330,17 +1345,17 @@
 
     // ---- Shadow beasts: chest drops, graded and capped by rank ----
     const beastPool = [
-      { id: 'ravenling', name: 'Ravenling', type: 'carrion crow',    grade: 'E' },
-      { id: 'skitter',   name: 'Skitter',   type: 'tomb spider',     grade: 'E' },
-      { id: 'cur',       name: 'Cur',       type: 'mange jackal',    grade: 'E' },
-      { id: 'direwolf',  name: 'Direwolf',  type: 'pack alpha',      grade: 'D' },
-      { id: 'tusker',    name: 'Tusker',    type: 'shadow boar',     grade: 'D' },
-      { id: 'stalker',   name: 'Stalker',   type: 'shadow panther',  grade: 'C' },
-      { id: 'adder',     name: 'Adder',     type: 'hooded serpent',  grade: 'C' },
-      { id: 'ursine',    name: 'Ursine',    type: 'shadow bear',     grade: 'B' },
-      { id: 'wyrm',      name: 'Wyrm',      type: 'horned serpent',  grade: 'B' },
-      { id: 'sabre',     name: 'Sabre',     type: 'tusked hunter',   grade: 'A' },
-      { id: 'drake',     name: 'Drake',     type: 'winged wyrm',     grade: 'S' }
+      { id: 'ravenling', name: 'Ravenling', type: 'carrion crow',    grade: 'E', lore: "The first thing to arrive on a battlefield and the last to leave. It followed you before you were strong enough to notice." },
+      { id: 'skitter',   name: 'Skitter',   type: 'tomb spider',     grade: 'E', lore: "It does not weave to catch. It weaves to remember where everything fell." },
+      { id: 'cur',       name: 'Cur',       type: 'mange jackal',    grade: 'E', lore: "Too thin to hunt, too stubborn to starve. It trailed you three nights before you noticed it." },
+      { id: 'direwolf',  name: 'Direwolf',  type: 'pack alpha',      grade: 'D', lore: "Led a pack of fourteen through the northern tunnels. Lost thirteen in one night and still stood over the fourteenth." },
+      { id: 'tusker',    name: 'Tusker',    type: 'shadow boar',     grade: 'D', lore: "Charges in a straight line and never turns aside. It has broken more walls than enemies." },
+      { id: 'stalker',   name: 'Stalker',   type: 'shadow panther',  grade: 'C', lore: "You never hear it coming. That is not training. That is simply what it is." },
+      { id: 'adder',     name: 'Adder',     type: 'hooded serpent',  grade: 'C', lore: "It spreads the hood as a warning. Whoever ignores that warning is not given a second one." },
+      { id: 'ursine',    name: 'Ursine',    type: 'shadow bear',     grade: 'B', lore: "It did not move when the cave came down. When the rubble was cleared it stood in the same place, the entrance at its back." },
+      { id: 'wyrm',      name: 'Wyrm',      type: 'horned serpent',  grade: 'B', lore: "Older than the gate you found it in. It was already there before anyone opened that door." },
+      { id: 'sabre',     name: 'Sabre',     type: 'tusked hunter',   grade: 'A', lore: "The fangs do not fit its own jaw. That is not a flaw in the design. That is the design." },
+      { id: 'drake',     name: 'Drake',     type: 'winged wyrm',     grade: 'S', lore: "The last beast your army can take. It does not fly because it must, but because nothing in the gate reaches high enough to stop it." }
     ];
 
     const gradeOrder = ['E', 'D', 'C', 'B', 'A', 'S'];
@@ -1365,13 +1380,13 @@
     };
 
     const shadowSoldiers = [
-      { level: 1, name: 'Shadow Fragment', key: 'fragment' },
-      { level: 10, name: 'Iron', key: 'iron' },
-      { level: 18, name: 'Tank', key: 'tank' },
-      { level: 28, name: 'Igris', key: 'igris' },
-      { level: 40, name: 'Tusk', key: 'tusk' },
-      { level: 55, name: 'Beru', key: 'beru' },
-      { level: 75, name: 'Bellion', key: 'bellion' }
+      { level: 1, name: 'Shadow Fragment', key: 'fragment', lore: "No shape yet, no name. One eye that opens on the day you first do not skip." },
+      { level: 10, name: 'Iron', key: 'iron', lore: "Carries a shield larger than himself. He has never lowered it, not even when that would have been wiser." },
+      { level: 18, name: 'Tank', key: 'tank', lore: "No weapon and no helm. What comes at him breaks or turns around. There is no third option." },
+      { level: 28, name: 'Igris', key: 'igris', lore: "The first you summoned who looked back. He does not kneel out of fear but out of recognition, and stands before you give the order." },
+      { level: 40, name: 'Tusk', key: 'tusk', lore: "The ring on his staff is the only light in your army that is not an eye. He has never let it go out." },
+      { level: 55, name: 'Beru', key: 'beru', lore: "He was a king before he was yours. He still calls you by a title nobody else uses." },
+      { level: 75, name: 'Bellion', key: 'bellion', lore: "The end of the line. There is no rank above him because there was no one left to hold it." }
     ];
 
     const auraStages = [
@@ -1994,7 +2009,10 @@
     }
 
     function grantBeast(beast) {
-      if (!state.ownedBeasts.includes(beast.id)) state.ownedBeasts.push(beast.id);
+      if (!state.ownedBeasts.includes(beast.id)) {
+        state.ownedBeasts.push(beast.id);
+        addTimeline('beast', `${beast.name} captured`, `${beast.grade}-grade \u00b7 ${beast.type}`);
+      }
       if (!state.activeBeasts.includes(beast.id)) {
         state.activeBeasts.unshift(beast.id);
         state.activeBeasts = state.activeBeasts.slice(0, 3);
@@ -2023,6 +2041,7 @@
         state.shards = 0;
         const beast = upgradable[Math.floor(Math.random() * upgradable.length)];
         state.alphaBeasts.push(beast.id);
+        addTimeline('alpha', `Alpha ${beast.name}`, 'Shards spent on an upgrade');
         return { type: 'alpha', beast };
       }
 
@@ -2955,7 +2974,7 @@
 
       document.getElementById('shadowSoldiers').innerHTML = shadowSoldiers.map(s => {
         const unlocked = level >= s.level;
-        return `<div class="reward companion-card ${unlocked ? '' : 'locked'}">
+        return `<div class="reward companion-card ${unlocked ? '' : 'locked'}" onclick="showGeneral('${s.key}')" style="cursor:pointer;">
           <div class="fake-img"><div class="sprite">${pxTag(s.key, 2)}</div></div>
           ${unlocked ? '' : '<div class="lock">🔒</div>'}
           <div class="level-badge">Lv ${s.level}</div>
@@ -2981,7 +3000,7 @@
         const reachable = gradeOrder.indexOf(b.grade) <= tierCap;
 
         return `<div class="reward companion-card beast-card ${owned ? '' : 'locked'} ${alpha ? 'alpha' : ''}"
-          onclick="toggleBeast('${b.id}')"
+          onclick="showBeast('${b.id}')"
           title="${b.name} — ${b.type}"
           style="cursor:${owned ? 'pointer' : 'default'}; border-color:${active ? 'rgba(34,211,238,.8)' : alpha ? 'rgba(251,191,36,.55)' : 'rgba(255,255,255,.1)'};">
           <div class="fake-img">${owned ? `<div class="sprite">${pxTag(b.id, 2)}</div>` : '<span style="font-size:22px;">?</span>'}</div>
@@ -3336,7 +3355,10 @@
           gate:     { color: '#fda4af', icon: '\u2609' },
           siege:    { color: '#e23e57', icon: '\u2620' },
           comeback: { color: '#f0a35a', icon: '\u21ba' },
-          deload:   { color: '#4ade80', icon: '\u25c8' }
+          deload:   { color: '#4ade80', icon: '\u25c8' },
+          beast:    { color: '#60a5fa', icon: '\u25cf' },
+          alpha:    { color: '#fde68a', icon: '\u2605' },
+          streak:   { color: '#f97316', icon: '\u25b2' }
         };
         if (!state.timeline.length) {
           tl.innerHTML = '<p class="small">Your first rank-up, general and Gate will appear here.</p>';
@@ -3499,6 +3521,9 @@
         state.weekStreak += 1;
         state.lastBankedWeek = weekKey;
         if (state.weekStreak > state.bestWeekStreak) state.bestWeekStreak = state.weekStreak;
+        if ([4, 8, 12, 26, 52].includes(state.weekStreak)) {
+          addTimeline('streak', `${state.weekStreak} week streak`, 'Milestone reached');
+        }
         weekMessage = deloadActive()
           ? ` \u00b7 Deload week banked \u00b7 streak ${state.weekStreak}`
           : ` \u00b7 Week banked \u00b7 streak ${state.weekStreak}`;
@@ -3555,9 +3580,11 @@
       const unlocked = shadowSoldiers.filter(sd => level >= sd.level);
       const latest = unlocked[unlocked.length - 1];
       if (latest && state.lastGeneralName !== latest.name) {
-        if (state.lastGeneralName) {
+        // log every general, including the first one
+        const firstEver = !state.lastGeneralName && state.trainingDays.length === 0;
+        if (!firstEver) {
           state.lastGeneralDate = today();
-          addTimeline('general', `${latest.name} joined`, `Level ${latest.level}`);
+          addTimeline('general', `${latest.name} joined your army`, `Level ${latest.level} \u00b7 lieutenant`);
         }
         state.lastGeneralName = latest.name;
       }
@@ -3596,6 +3623,55 @@
       render();
       toast(`Boss raid cleared! +${boss.xp} XP`);
     }
+
+    let unitOpen = null;
+
+    function showBeast(id) {
+      const b = beastPool.find(x => x.id === id);
+      if (!b || !state.ownedBeasts.includes(id)) return;
+      unitOpen = { kind: 'beast', id };
+      const colour = gradeColor[b.grade];
+      const alpha = state.alphaBeasts.includes(id);
+      document.getElementById('unitArt').innerHTML = pxTag(id, 4);
+      document.getElementById('unitGrade').textContent = `${b.grade}-grade${alpha ? ' \u00b7 alpha' : ''}`;
+      document.getElementById('unitGrade').style.color = colour;
+      document.getElementById('unitName').textContent = b.name;
+      document.getElementById('unitName').style.color = colour;
+      document.getElementById('unitType').textContent = b.type;
+      document.getElementById('unitLore').textContent = b.lore || '';
+      document.getElementById('unitLore').style.setProperty('--unit-color', colour);
+      const btn = document.getElementById('unitFollow');
+      btn.style.display = '';
+      btn.textContent = state.activeBeasts.includes(id) ? 'Stop following' : 'Follow me';
+      document.getElementById('unitModal').classList.add('show');
+    }
+
+    function showGeneral(key) {
+      const g = shadowSoldiers.find(x => x.key === key);
+      if (!g) return;
+      const unlocked = currentLevel() >= g.level;
+      unitOpen = { kind: 'general', id: key };
+      const colour = SPRITE_AURA[key] || '#a78bfa';
+      document.getElementById('unitArt').innerHTML = unlocked ? pxTag(key, 4) : '';
+      document.getElementById('unitGrade').textContent = unlocked ? 'Lieutenant' : `Locked \u00b7 Level ${g.level}`;
+      document.getElementById('unitGrade').style.color = unlocked ? colour : '#71717a';
+      document.getElementById('unitName').textContent = unlocked ? g.name : '???';
+      document.getElementById('unitName').style.color = unlocked ? colour : '#71717a';
+      document.getElementById('unitType').textContent = `Joins at Level ${g.level}`;
+      document.getElementById('unitLore').textContent = unlocked ? (g.lore || '') : 'Not yet summoned.';
+      document.getElementById('unitLore').style.setProperty('--unit-color', unlocked ? colour : '#3f3f46');
+      document.getElementById('unitFollow').style.display = 'none';
+      document.getElementById('unitModal').classList.add('show');
+    }
+
+    function unitFollowAction() {
+      if (!unitOpen || unitOpen.kind !== 'beast') return;
+      toggleBeast(unitOpen.id);
+      showBeast(unitOpen.id);
+    }
+
+    function hideUnit() { document.getElementById('unitModal').classList.remove('show'); unitOpen = null; }
+    function closeUnit(e) { if (e.target.id === 'unitModal') hideUnit(); }
 
     function toggleBeast(id) {
       if (!state.ownedBeasts.includes(id)) return;
