@@ -1,5 +1,5 @@
 // Bump this number whenever you upload a new index.html
-const VERSION = 'shadow-hunter-v24';
+const VERSION = 'shadow-hunter-v25';
 const FILES = [
   './', './index.html', './manifest.json', './icon-192.png', './icon-512.png',
   './sprites/adder.png',
