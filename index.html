@@ -1764,6 +1764,7 @@
     state.lastSiegeTier ??= '';
     state.pinnedTitle ??= '';
     state.titleOrder ??= [];
+    state.titlesSeeded ??= false;
     state.deloadWeek ??= '';
     state.deloadTakenAt ??= 0;
     state.deloadsTaken ??= 0;
@@ -2919,8 +2920,17 @@
 
       const titles = earnedTitles();
 
-      // remember the order titles were earned in, so "most recent" is real
-      titles.forEach(id => { if (!state.titleOrder.includes(id)) state.titleOrder.push(id); });
+      // remember the order titles were earned in, so "most recent" is real,
+      // and record each one on the timeline the first time it appears
+      titles.forEach(id => {
+        if (!state.titleOrder.includes(id)) {
+          state.titleOrder.push(id);
+          const t = TITLES.find(x => x.id === id);
+          // the very first render of an existing save backfills silently
+          if (t && state.titlesSeeded) addTimeline('title', `Title earned: ${t.name}`, t.desc);
+        }
+      });
+      if (!state.titlesSeeded) { state.titlesSeeded = true; save(); }
       state.titleOrder = state.titleOrder.filter(id => titles.includes(id));
       if (state.pinnedTitle && !titles.includes(state.pinnedTitle)) state.pinnedTitle = '';
 
@@ -3358,7 +3368,8 @@
           deload:   { color: '#4ade80', icon: '\u25c8' },
           beast:    { color: '#60a5fa', icon: '\u25cf' },
           alpha:    { color: '#fde68a', icon: '\u2605' },
-          streak:   { color: '#f97316', icon: '\u25b2' }
+          streak:   { color: '#f97316', icon: '\u25b2' },
+          title:    { color: '#c084fc', icon: '\u2726' }
         };
         if (!state.timeline.length) {
           tl.innerHTML = '<p class="small">Your first rank-up, general and Gate will appear here.</p>';
